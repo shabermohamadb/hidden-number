@@ -8,12 +8,14 @@ import { HowToPlayModal } from './components/landing/HowToPlayModal';
 import { RulesAndScoringModal } from './components/landing/RulesAndScoringModal';
 import { CreateRoomModal } from './components/landing/CreateRoomModal';
 import { JoinRoomModal } from './components/landing/JoinRoomModal';
-import { ProfileDrawer } from './components/profile/ProfileDrawer';
+import { ProfileHubModal } from './components/profile/ProfileHubModal';
+import { PublicProfileModal } from './components/profile/PublicProfileModal';
 import { MatchmakingOverlay } from './components/matchmaking/MatchmakingOverlay';
 import { ServerConfigModal } from './components/common/ServerConfigModal';
 import { LobbyView } from './components/lobby/LobbyView';
 import { GameArenaView } from './components/game/GameArenaView';
 import { ResultsView } from './components/results/ResultsView';
+import { Send, CheckCircle, X } from 'lucide-react';
 
 export function App() {
   const {
@@ -22,6 +24,21 @@ export function App() {
     queueStatus,
     error,
     isSubmitting,
+    profile,
+    friends,
+    friendRequests,
+    incomingRoomInvite,
+    dismissRoomInvite,
+    fetchProfile,
+    updateProfile,
+    getPublicProfile,
+    searchPlayers,
+    sendFriendRequest,
+    respondFriendRequest,
+    removeFriend,
+    inviteFriendToRoom,
+    reportPlayer,
+    deleteAccount,
     clearError,
     createRoom,
     joinRoom,
@@ -56,6 +73,16 @@ export function App() {
     return saved;
   });
 
+  // Sync profile data when available
+  useEffect(() => {
+    if (profile?.username) {
+      setNickname(profile.username);
+    }
+    if (profile?.customAvatar || profile?.avatar) {
+      setAvatar(profile.customAvatar || profile.avatar);
+    }
+  }, [profile]);
+
   // Modal states
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -63,6 +90,7 @@ export function App() {
   const [joinRoomOpen, setJoinRoomOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [serverConfigOpen, setServerConfigOpen] = useState(false);
+  const [publicProfileTargetId, setPublicProfileTargetId] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
 
   // 1. Immediately cache invite code from URL parameter (?room=XYZ)
@@ -202,6 +230,7 @@ export function App() {
             onReadyToggle={setReady}
             onStartGame={startGame}
             onLeaveRoom={leaveRoom}
+            onInspectPlayer={(pid) => setPublicProfileTargetId(pid)}
             error={error}
           />
         ) : gameState.phase === 'QUESTION_PHASE' || gameState.phase === 'GUESSING_PHASE' ? (
@@ -212,6 +241,7 @@ export function App() {
             onAskQuestion={askQuestion}
             onSubmitAnswer={submitAnswer}
             onSubmitGuess={submitGuess}
+            onInspectPlayer={(pid) => setPublicProfileTargetId(pid)}
             isSubmittingGuess={isSubmitting}
           />
         ) : (
@@ -224,10 +254,43 @@ export function App() {
               onNextRound={nextRound}
               onRematch={nextRound}
               onReturnToLobby={returnToLobby}
+              onInspectPlayer={(pid) => setPublicProfileTargetId(pid)}
             />
           )
         )}
       </main>
+
+      {/* Floating Incoming Arena Invitation Toast */}
+      {incomingRoomInvite && (
+        <div className="fixed top-20 right-6 z-50 p-4 rounded-2xl bg-[#0D1017] border border-[#D4AF37] text-[#FAF8F5] shadow-2xl backdrop-blur-md flex items-center gap-4 animate-in slide-in-from-top duration-300">
+          <div className="w-10 h-10 rounded-xl bg-[#1A1F2C] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+            <Send className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold">Arena Invitation</span>
+            <div className="text-xs font-mono font-bold text-[#FAF8F5]">
+              {incomingRoomInvite.inviter.username} invited you to Arena #{incomingRoomInvite.roomCode}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 ml-2">
+            <button
+              onClick={() => {
+                joinRoom(incomingRoomInvite.roomCode, nickname, avatar);
+                dismissRoomInvite();
+              }}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#9A7B38] to-[#D4AF37] text-black font-extrabold text-xs font-mono shadow-md"
+            >
+              Accept
+            </button>
+            <button
+              onClick={dismissRoomInvite}
+              className="p-1.5 rounded-xl bg-[#131722] hover:bg-white/10 text-[#A7A29A]"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modals & Overlays */}
       <HowToPlayModal
@@ -255,12 +318,32 @@ export function App() {
         errorMessage={error}
       />
 
-      <ProfileDrawer
+      <ProfileHubModal
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        nickname={nickname}
-        avatar={avatar}
-        onSaveProfile={handleSaveProfile}
+        profile={profile}
+        friends={friends}
+        friendRequests={friendRequests}
+        currentRoomCode={gameState?.roomCode}
+        onUpdateProfile={updateProfile}
+        onSearchPlayers={searchPlayers}
+        onSendFriendRequest={sendFriendRequest}
+        onRespondFriendRequest={respondFriendRequest}
+        onRemoveFriend={removeFriend}
+        onInviteToRoom={(fid) => inviteFriendToRoom(fid, gameState?.roomCode)}
+        onInspectPlayer={(pid) => setPublicProfileTargetId(pid)}
+        onDeleteAccount={deleteAccount}
+      />
+
+      <PublicProfileModal
+        isOpen={Boolean(publicProfileTargetId)}
+        onClose={() => setPublicProfileTargetId(null)}
+        targetPlayerId={publicProfileTargetId}
+        onGetPublicProfile={getPublicProfile}
+        onSendFriendRequest={sendFriendRequest}
+        onInviteToRoom={(fid) => inviteFriendToRoom(fid, gameState?.roomCode)}
+        onReportPlayer={reportPlayer}
+        currentRoomCode={gameState?.roomCode}
       />
 
       <ServerConfigModal

@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { GameEngine, GamePhase } from './game/GameEngine.js';
 import { Matchmaker } from './game/Matchmaker.js';
+import { ProfileManager } from './game/ProfileManager.js';
 
 dotenv.config();
 
@@ -30,8 +31,9 @@ app.use(express.json());
 
 // In-Memory Storage & Managers
 class RoomManager {
-  constructor(io) {
+  constructor(io, profileManager = null) {
     this.io = io;
+    this.profileManager = profileManager;
     this.rooms = new Map(); // roomCode -> GameEngine
     this.playerSessions = new Map(); // sessionId -> { playerId, roomCode, nickname, avatar }
     this.socketToSession = new Map(); // socketId -> sessionId
@@ -47,7 +49,7 @@ class RoomManager {
 
   createRoom(hostId, nickname, avatar, settings = {}, socketId = null) {
     const roomCode = this.generateRoomCode();
-    const game = new GameEngine(roomCode, hostId, settings, this.io);
+    const game = new GameEngine(roomCode, hostId, settings, this.io, this.profileManager);
     game.addPlayer(hostId, nickname, avatar, socketId);
     this.rooms.set(roomCode, game);
     return game;
@@ -94,7 +96,8 @@ const io = new Server(server, {
   pingTimeout: 5000
 });
 
-const roomManager = new RoomManager(io);
+const profileManager = new ProfileManager();
+const roomManager = new RoomManager(io, profileManager);
 const matchmaker = new Matchmaker(roomManager, io);
 
 // Periodic cleanup of stale rooms
@@ -111,7 +114,8 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     activeRooms: roomManager.rooms.size,
-    queuedPlayers: matchmaker.queue.length
+    queuedPlayers: matchmaker.queue.length,
+    registeredProfiles: profileManager.profiles.size
   });
 });
 
@@ -132,6 +136,85 @@ app.get('/api/rooms', (req, res) => {
   res.json({ rooms: publicRooms });
 });
 
+// Profile & Progression API
+app.get('/api/profile/:playerId', (req, res) => {
+  const { playerId } = req.params;
+  const profile = profileManager.getOrCreateProfile(playerId);
+  res.json({ success: true, profile });
+});
+
+app.post('/api/profile/update', (req, res) => {
+  const { playerId, updates } = req.body;
+  if (!playerId) {
+    return res.status(400).json({ success: false, error: 'Missing playerId' });
+  }
+  const result = profileManager.updateProfile(playerId, updates);
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  res.json(result);
+});
+
+app.get('/api/profile/public/:targetId', (req, res) => {
+  const { targetId } = req.params;
+  const requesterId = req.query.requesterId;
+  const profile = profileManager.getPublicProfile(requesterId, targetId);
+  if (!profile) {
+    return res.status(404).json({ success: false, error: 'Player profile not found' });
+  }
+  res.json({ success: true, profile });
+});
+
+app.get('/api/profile/search', (req, res) => {
+  const query = req.query.q || '';
+  const requesterId = req.query.requesterId;
+  const results = profileManager.searchPlayers(query, requesterId);
+  res.json({ success: true, results });
+});
+
+app.get('/api/friends/:playerId', (req, res) => {
+  const { playerId } = req.params;
+  const friends = profileManager.getFriendsList(playerId);
+  const requests = profileManager.getFriendRequests(playerId);
+  res.json({ success: true, friends, requests });
+});
+
+app.post('/api/friends/request', (req, res) => {
+  const { requesterId, targetId } = req.body;
+  const result = profileManager.sendFriendRequest(requesterId, targetId);
+  res.json(result);
+});
+
+app.post('/api/friends/respond', (req, res) => {
+  const { playerId, senderId, accept } = req.body;
+  const result = profileManager.respondFriendRequest(playerId, senderId, accept);
+  res.json(result);
+});
+
+app.post('/api/friends/remove', (req, res) => {
+  const { playerId, friendId } = req.body;
+  const result = profileManager.removeFriend(playerId, friendId);
+  res.json(result);
+});
+
+app.post('/api/friends/block', (req, res) => {
+  const { playerId, targetId } = req.body;
+  const result = profileManager.blockPlayer(playerId, targetId);
+  res.json(result);
+});
+
+app.post('/api/report', (req, res) => {
+  const { reporterId, reportedId, reason, details } = req.body;
+  const result = profileManager.reportPlayer(reporterId, reportedId, reason, details);
+  res.json(result);
+});
+
+app.post('/api/account/delete', (req, res) => {
+  const { playerId } = req.body;
+  const result = profileManager.deleteAccount(playerId);
+  res.json(result);
+});
+
 // ==========================================
 // Real-Time Socket Event Routing
 // ==========================================
@@ -149,6 +232,7 @@ io.on('connection', (socket) => {
     currentPlayerId = pid;
 
     roomManager.socketToSession.set(socket.id, sid);
+    profileManager.registerPlayerSocket(pid, socket.id);
 
     let session = roomManager.playerSessions.get(sid);
     if (!session) {
@@ -160,12 +244,15 @@ io.on('connection', (socket) => {
       session.avatar = avatar || session.avatar;
     }
 
+    const profile = profileManager.getOrCreateProfile(pid, session.nickname, session.avatar);
+
     if (callback) {
       callback({
         success: true,
         sessionId: sid,
         playerId: session.playerId,
-        roomCode: session.roomCode
+        roomCode: session.roomCode,
+        profile
       });
     }
   });
@@ -201,6 +288,8 @@ io.on('connection', (socket) => {
     currentPlayerId = session.playerId;
     currentRoomCode = session.roomCode;
     if (sessionId) roomManager.socketToSession.set(socket.id, sessionId);
+    profileManager.registerPlayerSocket(currentPlayerId, socket.id);
+    profileManager.setPlayerRoom(currentPlayerId, game.roomCode);
 
     socket.join(game.roomCode);
     game.addPlayer(session.playerId, session.nickname, session.avatar, socket.id);
@@ -225,9 +314,11 @@ io.on('connection', (socket) => {
     currentPlayerId = pid;
     if (sessionId) currentSessionId = sessionId;
 
+    profileManager.registerPlayerSocket(pid, socket.id);
     const game = roomManager.createRoom(pid, nickname, avatar, settings, socket.id);
 
     currentRoomCode = game.roomCode;
+    profileManager.setPlayerRoom(pid, game.roomCode);
     socket.join(game.roomCode);
 
     if (currentSessionId) {
@@ -266,6 +357,8 @@ io.on('connection', (socket) => {
 
     const game = result.game;
     currentRoomCode = game.roomCode;
+    profileManager.registerPlayerSocket(pid, socket.id);
+    profileManager.setPlayerRoom(pid, game.roomCode);
     socket.join(game.roomCode);
 
     if (currentSessionId) {
@@ -419,6 +512,7 @@ io.on('connection', (socket) => {
   // 14. Leave Room
   socket.on('room:leave', (callback) => {
     if (currentRoomCode && currentPlayerId) {
+      profileManager.setPlayerRoom(currentPlayerId, null);
       const game = roomManager.getRoom(currentRoomCode);
       if (game) {
         socket.leave(game.roomCode);
@@ -444,6 +538,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     if (currentPlayerId) {
       matchmaker.removeFromQueue(currentPlayerId);
+      profileManager.unregisterPlayerSocket(currentPlayerId, socket.id);
     }
     if (currentRoomCode && currentPlayerId) {
       const game = roomManager.getRoom(currentRoomCode);
@@ -453,6 +548,160 @@ io.on('connection', (socket) => {
       }
     }
     roomManager.socketToSession.delete(socket.id);
+  });
+
+  // ==========================================
+  // Real-Time Profile, Progression & Social Events
+  // ==========================================
+
+  // 16. Profile Retrieval
+  socket.on('profile:get', ({ playerId } = {}, callback) => {
+    const pid = playerId || currentPlayerId;
+    if (!pid) {
+      if (callback) callback({ success: false, error: 'No player ID specified' });
+      return;
+    }
+    const profile = profileManager.getOrCreateProfile(pid);
+    if (callback) callback({ success: true, profile });
+  });
+
+  // 17. Profile Update
+  socket.on('profile:update', ({ playerId, updates } = {}, callback) => {
+    const pid = playerId || currentPlayerId;
+    if (!pid) {
+      if (callback) callback({ success: false, error: 'No player ID specified' });
+      return;
+    }
+    // Security check: cannot modify another player's profile
+    if (currentPlayerId && pid !== currentPlayerId) {
+      if (callback) callback({ success: false, error: 'Unauthorized to modify another player profile' });
+      return;
+    }
+
+    const result = profileManager.updateProfile(pid, updates);
+    if (callback) callback(result);
+
+    // If username or avatar changed while in an active room, propagate to players
+    if (result.success && currentRoomCode) {
+      const game = roomManager.getRoom(currentRoomCode);
+      if (game && game.players.has(pid)) {
+        const player = game.players.get(pid);
+        if (updates.username) player.nickname = updates.username;
+        if (updates.avatar || updates.customAvatar) {
+          player.avatar = updates.customAvatar || updates.avatar;
+        }
+        game.broadcastTailoredState();
+      }
+    }
+  });
+
+  // 18. Public Profile Inspection
+  socket.on('profile:public', ({ targetPlayerId, requesterPlayerId } = {}, callback) => {
+    if (!targetPlayerId) {
+      if (callback) callback({ success: false, error: 'Target player ID required' });
+      return;
+    }
+    const requester = requesterPlayerId || currentPlayerId;
+    const profile = profileManager.getPublicProfile(requester, targetPlayerId);
+    if (callback) callback({ success: !!profile, profile });
+  });
+
+  // 19. Search Players
+  socket.on('profile:search', ({ query } = {}, callback) => {
+    const results = profileManager.searchPlayers(query, currentPlayerId);
+    if (callback) callback({ success: true, results });
+  });
+
+  // 20. Social: Send Friend Request
+  socket.on('friend:request', ({ targetPlayerId } = {}, callback) => {
+    if (!currentPlayerId) {
+      if (callback) callback({ success: false, error: 'Not authenticated' });
+      return;
+    }
+    const result = profileManager.sendFriendRequest(currentPlayerId, targetPlayerId);
+    if (callback) callback(result);
+
+    if (result.success) {
+      // Notify target player if currently connected
+      const targetSockets = profileManager.onlineSockets.get(targetPlayerId);
+      if (targetSockets) {
+        const senderProfile = profileManager.getProfile(currentPlayerId);
+        for (const sId of targetSockets) {
+          io.to(sId).emit('friend:incoming-request', {
+            sender: senderProfile,
+            status: result.status
+          });
+        }
+      }
+    }
+  });
+
+  // 21. Social: Respond to Friend Request (Accept / Reject)
+  socket.on('friend:respond', ({ senderPlayerId, accept } = {}, callback) => {
+    if (!currentPlayerId) {
+      if (callback) callback({ success: false, error: 'Not authenticated' });
+      return;
+    }
+    const result = profileManager.respondFriendRequest(currentPlayerId, senderPlayerId, accept);
+    if (callback) callback(result);
+
+    if (result.success && accept) {
+      const senderSockets = profileManager.onlineSockets.get(senderPlayerId);
+      if (senderSockets) {
+        const myProfile = profileManager.getProfile(currentPlayerId);
+        for (const sId of senderSockets) {
+          io.to(sId).emit('friend:accepted', { friend: myProfile });
+        }
+      }
+    }
+  });
+
+  // 22. Social: Remove Friend
+  socket.on('friend:remove', ({ friendPlayerId } = {}, callback) => {
+    if (!currentPlayerId) {
+      if (callback) callback({ success: false, error: 'Not authenticated' });
+      return;
+    }
+    const result = profileManager.removeFriend(currentPlayerId, friendPlayerId);
+    if (callback) callback(result);
+  });
+
+  // 23. Social: Block Player
+  socket.on('friend:block', ({ targetPlayerId } = {}, callback) => {
+    if (!currentPlayerId) {
+      if (callback) callback({ success: false, error: 'Not authenticated' });
+      return;
+    }
+    const result = profileManager.blockPlayer(currentPlayerId, targetPlayerId);
+    if (callback) callback(result);
+  });
+
+  // 24. Social: Invite Friend to Room
+  socket.on('friend:invite-room', ({ friendPlayerId, roomCode } = {}, callback) => {
+    if (!currentPlayerId) {
+      if (callback) callback({ success: false, error: 'Not authenticated' });
+      return;
+    }
+    const targetRoom = roomCode || currentRoomCode;
+    if (!targetRoom) {
+      if (callback) callback({ success: false, error: 'No active room to invite to' });
+      return;
+    }
+
+    const myProfile = profileManager.getProfile(currentPlayerId);
+    const targetSockets = profileManager.onlineSockets.get(friendPlayerId);
+
+    if (targetSockets && targetSockets.size > 0) {
+      for (const sId of targetSockets) {
+        io.to(sId).emit('friend:room-invited', {
+          roomCode: targetRoom,
+          inviter: myProfile
+        });
+      }
+      if (callback) callback({ success: true, delivered: true });
+    } else {
+      if (callback) callback({ success: false, error: 'Player is currently offline' });
+    }
   });
 });
 

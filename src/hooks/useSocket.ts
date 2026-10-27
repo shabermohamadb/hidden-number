@@ -1,7 +1,16 @@
 // src/hooks/useSocket.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { GameState, GameMessage, Answer, Player } from '../types/game';
+import {
+  GameState,
+  GameMessage,
+  Answer,
+  Player,
+  UserProfile,
+  PublicUserProfile,
+  FriendSummary,
+  FriendRequest
+} from '../types/game';
 import { getServerUrl } from '../config/serverUrl';
 
 export function useSocket() {
@@ -12,6 +21,15 @@ export function useSocket() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [connectNonce, setConnectNonce] = useState<number>(0);
+
+  // Profile & Progression State
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [friends, setFriends] = useState<FriendSummary[]>([]);
+  const [friendRequests, setFriendRequests] = useState<{ incoming: FriendRequest[]; outgoing: FriendRequest[] }>({
+    incoming: [],
+    outgoing: []
+  });
+  const [incomingRoomInvite, setIncomingRoomInvite] = useState<{ roomCode: string; inviter: UserProfile } | null>(null);
 
   // Session persistence in localStorage (NEVER generates a new player on reload!)
   const getSession = useCallback(() => {
@@ -39,6 +57,22 @@ export function useSocket() {
     return { sessionId: sid, playerId: pid, nickname: nick, avatar };
   }, []);
 
+  const refreshFriends = useCallback(async (playerId: string) => {
+    try {
+      const serverUrl = getServerUrl();
+      const res = await fetch(`${serverUrl}/api/friends/${playerId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setFriends(data.friends || []);
+          setFriendRequests(data.requests || { incoming: [], outgoing: [] });
+        }
+      }
+    } catch {
+      // Graceful network fail
+    }
+  }, []);
+
   useEffect(() => {
     const serverUrl = getServerUrl();
     const session = getSession();
@@ -55,17 +89,22 @@ export function useSocket() {
       setConnected(true);
       setError(null);
 
-      // Initialize session
-      socket.emit('session:init', session, () => {
+      // Initialize session & retrieve profile
+      socket.emit('session:init', session, (res: { success: boolean; profile?: UserProfile }) => {
+        if (res?.profile) {
+          setProfile(res.profile);
+        }
+        refreshFriends(session.playerId);
+
         // Attempt to resume previous room if present
         socket.emit('session:resume', {
           sessionId: session.sessionId,
           playerId: session.playerId,
           nickname: session.nickname,
           avatar: session.avatar
-        }, (res: { success: boolean; state?: GameState }) => {
-          if (res?.success && res.state) {
-            setGameState(res.state);
+        }, (resumeRes: { success: boolean; state?: GameState }) => {
+          if (resumeRes?.success && resumeRes.state) {
+            setGameState(resumeRes.state);
           }
         });
       });
@@ -169,19 +208,181 @@ export function useSocket() {
 
     socket.on('matchmaking:status', (status: { status: 'IDLE' | 'SEARCHING' | 'MATCHED'; queueLength?: number; matchedRoomCode?: string }) => {
       setQueueStatus(status);
-      if (status.status === 'MATCHED' && status.matchedRoomCode) {
-        // Automatic joining will trigger state restoration
-      }
+    });
+
+    // Real-Time Social Notifications
+    socket.on('friend:incoming-request', () => {
+      refreshFriends(session.playerId);
+    });
+
+    socket.on('friend:accepted', () => {
+      refreshFriends(session.playerId);
+    });
+
+    socket.on('friend:room-invited', (invite: { roomCode: string; inviter: UserProfile }) => {
+      setIncomingRoomInvite(invite);
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [connectNonce]);
+  }, [connectNonce, getSession, refreshFriends]);
 
   const reconnect = useCallback(() => {
     setConnectNonce(n => n + 1);
   }, []);
+
+  // Profile and Social API hooks
+  const fetchProfile = useCallback((targetPlayerId?: string) => {
+    return new Promise<UserProfile | null>((resolve) => {
+      if (!socketRef.current) return resolve(null);
+      const session = getSession();
+      const pid = targetPlayerId || session.playerId;
+      socketRef.current.emit('profile:get', { playerId: pid }, (res: { success: boolean; profile?: UserProfile }) => {
+        if (res?.success && res.profile) {
+          if (!targetPlayerId || targetPlayerId === session.playerId) {
+            setProfile(res.profile);
+          }
+          resolve(res.profile);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }, [getSession]);
+
+  const updateProfile = useCallback((updates: Partial<UserProfile>) => {
+    return new Promise<{ success: boolean; profile?: UserProfile; error?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      const session = getSession();
+      socketRef.current.emit('profile:update', {
+        playerId: session.playerId,
+        updates
+      }, (res: { success: boolean; profile?: UserProfile; error?: string }) => {
+        if (res.success && res.profile) {
+          setProfile(res.profile);
+          if (res.profile.username) localStorage.setItem('hn_nickname', res.profile.username);
+          if (res.profile.avatar) localStorage.setItem('hn_avatar', res.profile.avatar);
+        }
+        resolve(res);
+      });
+    });
+  }, [getSession]);
+
+  const getPublicProfile = useCallback((targetPlayerId: string) => {
+    return new Promise<{ success: boolean; profile?: PublicUserProfile; error?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      const session = getSession();
+      socketRef.current.emit('profile:public', {
+        targetPlayerId,
+        requesterPlayerId: session.playerId
+      }, (res: { success: boolean; profile?: PublicUserProfile; error?: string }) => {
+        resolve(res);
+      });
+    });
+  }, [getSession]);
+
+  const searchPlayers = useCallback((query: string) => {
+    return new Promise<FriendSummary[]>((resolve) => {
+      if (!socketRef.current) return resolve([]);
+      socketRef.current.emit('profile:search', { query }, (res: { success: boolean; results?: FriendSummary[] }) => {
+        resolve(res?.results || []);
+      });
+    });
+  }, []);
+
+  const sendFriendRequest = useCallback((targetPlayerId: string) => {
+    return new Promise<{ success: boolean; error?: string; status?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      socketRef.current.emit('friend:request', { targetPlayerId }, (res: { success: boolean; error?: string; status?: string }) => {
+        const session = getSession();
+        refreshFriends(session.playerId);
+        resolve(res);
+      });
+    });
+  }, [getSession, refreshFriends]);
+
+  const respondFriendRequest = useCallback((senderPlayerId: string, accept: boolean) => {
+    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      socketRef.current.emit('friend:respond', { senderPlayerId, accept }, (res: { success: boolean; error?: string }) => {
+        const session = getSession();
+        refreshFriends(session.playerId);
+        resolve(res);
+      });
+    });
+  }, [getSession, refreshFriends]);
+
+  const removeFriend = useCallback((friendPlayerId: string) => {
+    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      socketRef.current.emit('friend:remove', { friendPlayerId }, (res: { success: boolean; error?: string }) => {
+        const session = getSession();
+        refreshFriends(session.playerId);
+        resolve(res);
+      });
+    });
+  }, [getSession, refreshFriends]);
+
+  const blockPlayer = useCallback((targetPlayerId: string) => {
+    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      socketRef.current.emit('friend:block', { targetPlayerId }, (res: { success: boolean; error?: string }) => {
+        const session = getSession();
+        refreshFriends(session.playerId);
+        resolve(res);
+      });
+    });
+  }, [getSession, refreshFriends]);
+
+  const inviteFriendToRoom = useCallback((friendPlayerId: string, roomCode?: string) => {
+    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+      if (!socketRef.current) return resolve({ success: false, error: 'Disconnected' });
+      socketRef.current.emit('friend:invite-room', { friendPlayerId, roomCode }, (res: { success: boolean; error?: string }) => {
+        resolve(res);
+      });
+    });
+  }, []);
+
+  const reportPlayer = useCallback(async (reportedId: string, reason: string, details?: string) => {
+    try {
+      const serverUrl = getServerUrl();
+      const session = getSession();
+      const res = await fetch(`${serverUrl}/api/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reporterId: session.playerId,
+          reportedId,
+          reason,
+          details
+        })
+      });
+      return await res.json();
+    } catch {
+      return { success: false, error: 'Network error submitting report' };
+    }
+  }, [getSession]);
+
+  const deleteAccount = useCallback(async () => {
+    try {
+      const serverUrl = getServerUrl();
+      const session = getSession();
+      const res = await fetch(`${serverUrl}/api/account/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId: session.playerId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.clear();
+        window.location.reload();
+      }
+      return data;
+    } catch {
+      return { success: false, error: 'Network error deleting account' };
+    }
+  }, [getSession]);
 
   // Actions
   const createRoom = useCallback((nickname: string, avatar: string, settings = {}) => {
@@ -367,6 +568,22 @@ export function useSocket() {
     queueStatus,
     error,
     isSubmitting,
+    profile,
+    friends,
+    friendRequests,
+    incomingRoomInvite,
+    dismissRoomInvite: () => setIncomingRoomInvite(null),
+    fetchProfile,
+    updateProfile,
+    getPublicProfile,
+    searchPlayers,
+    sendFriendRequest,
+    respondFriendRequest,
+    removeFriend,
+    blockPlayer,
+    inviteFriendToRoom,
+    reportPlayer,
+    deleteAccount,
     clearError: () => setError(null),
     createRoom,
     joinRoom,

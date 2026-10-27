@@ -12,6 +12,7 @@ interface Props {
   onNextRound: () => void;
   onRematch: () => void;
   onReturnToLobby: () => void;
+  onInspectPlayer?: (playerId: string) => void;
 }
 
 export const ResultsView: React.FC<Props> = ({
@@ -20,7 +21,8 @@ export const ResultsView: React.FC<Props> = ({
   isHost,
   onNextRound,
   onRematch,
-  onReturnToLobby
+  onReturnToLobby,
+  onInspectPlayer
 }) => {
   const { playReveal, playVictory, playClick } = useSoundFX();
 
@@ -95,7 +97,11 @@ export const ResultsView: React.FC<Props> = ({
                   }`}>
                     #{index + 1}
                   </div>
-                  <span className="font-display font-bold text-sm text-[#FAF8F5] max-w-[120px] truncate">
+                  <span
+                    onClick={() => onInspectPlayer?.(score.playerId)}
+                    className="font-display font-bold text-sm text-[#FAF8F5] max-w-[120px] truncate cursor-pointer hover:text-[#D4AF37] transition-colors"
+                    title="Click to view player dossier"
+                  >
                     {score.nickname}
                   </span>
                   {isMe && <span className="text-[9px] font-mono px-1 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40">YOU</span>}

@@ -92,14 +92,144 @@ export interface GameState {
   results: GameResults | null;
 }
 
-export interface UserProfile {
-  id: string;
-  nickname: string;
-  avatar: string;
+export interface UserStats {
   gamesPlayed: number;
   wins: number;
+  losses: number;
+  draws: number;
+  winRate: number;
   totalPoints: number;
+  bestScore: number;
   exactGuesses: number;
-  accuracyRate: number;
+  totalGuesses: number;
+  correctGuesses: number;
+  averageAccuracy: number;
+  currentStreak: number;
+  bestStreak: number;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  tier: 'bronze' | 'silver' | 'gold' | 'obsidian';
+  xpReward: number;
+  rewardType: 'title' | 'frame' | 'badge';
+  rewardId: string;
+  icon: string;
+  progress: number;
+  maxProgress: number;
+  unlocked: boolean;
+  unlockedAt: string | null;
+}
+
+export interface MatchRecord {
+  id: string;
+  matchId: string;
+  roomCode: string;
+  rank: number;
+  totalPlayers: number;
+  finalScore: number;
+  accuracy: number;
+  exactGuesses: number;
+  isWin: boolean;
+  opponents: Array<{
+    playerId: string;
+    nickname: string;
+    avatar: string;
+    score: number;
+  }>;
+  earnedXp: number;
+  playedAt: string;
+}
+
+export interface UserCosmetics {
+  frames: string[];
+  titles: string[];
+  badges: string[];
+}
+
+export interface UserSettings {
+  visibility: 'public' | 'friends_only' | 'private';
+  notifications: boolean;
+  reducedMotion: boolean;
+  soundSfx: number;
+  soundMusic: number;
+}
+
+export interface UserProfile {
+  playerId: string;
+  username: string;
+  avatar: string;
+  customAvatar: string | null;
+  title: string;
+  frame: string;
+  badge: string;
+  bio: string;
+  xp: number;
+  level: number;
+  currentLevelXp: number;
+  nextLevelXp: number;
+  levelProgressPercent: number;
+  stats: UserStats;
+  unlockedCosmetics: UserCosmetics;
+  achievements: Achievement[];
+  matchHistory: MatchRecord[];
+  settings: UserSettings;
+  createdAt: string;
+  updatedAt: string;
+  friendCount?: number;
+  isOnline?: boolean;
+  currentRoomCode?: string | null;
+}
+
+export interface PublicUserProfile {
+  playerId: string;
+  username: string;
+  avatar: string;
+  customAvatar?: string | null;
+  title?: string;
+  frame?: string;
+  badge?: string;
+  bio?: string;
+  level: number;
+  xp?: number;
+  currentLevelXp?: number;
+  nextLevelXp?: number;
+  levelProgressPercent?: number;
+  stats?: UserStats;
+  unlockedAchievementsCount?: number;
+  recentMatches?: MatchRecord[];
+  isOnline?: boolean;
+  currentRoomCode?: string | null;
+  isFriend?: boolean;
+  isPrivate?: boolean;
+  isFriendsOnly?: boolean;
+  headToHead?: {
+    gamesTogether: number;
+    winsA: number;
+    winsB: number;
+  } | null;
+}
+
+export interface FriendSummary {
+  playerId: string;
+  username: string;
+  avatar: string;
+  customAvatar?: string | null;
+  title?: string;
+  frame?: string;
+  level: number;
+  isOnline: boolean;
+  currentRoomCode?: string | null;
+}
+
+export interface FriendRequest {
+  playerId: string;
+  username: string;
+  avatar: string;
+  level: number;
+  sentAt: string;
 }
 

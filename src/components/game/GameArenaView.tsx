@@ -25,6 +25,7 @@ interface Props {
   onAskQuestion: (content: string, targetPlayerId?: string) => Promise<{ success: boolean; error?: string }>;
   onSubmitAnswer: (questionId: string, answer: string, targetPlayerId?: string) => Promise<{ success: boolean; error?: string }>;
   onSubmitGuess: (guess: number) => Promise<{ success: boolean; error?: string }>;
+  onInspectPlayer?: (playerId: string) => void;
   isSubmittingGuess: boolean;
 }
 
@@ -34,6 +35,7 @@ export const GameArenaView: React.FC<Props> = ({
   onAskQuestion,
   onSubmitAnswer,
   onSubmitGuess,
+  onInspectPlayer,
   isSubmittingGuess
 }) => {
   const { playClick } = useSoundFX();
@@ -185,12 +187,26 @@ export const GameArenaView: React.FC<Props> = ({
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-display font-black text-black text-sm shadow shrink-0">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onInspectPlayer?.(player.id);
+                        }}
+                        className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-display font-black text-black text-sm shadow shrink-0 hover:scale-105 transition-transform"
+                        title="Click to view dossier"
+                      >
                         {player.nickname.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-display font-bold text-sm text-[#FAF8F5]">
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onInspectPlayer?.(player.id);
+                            }}
+                            className="font-display font-bold text-sm text-[#FAF8F5] hover:text-[#D4AF37] transition-colors"
+                            title="Click to view dossier"
+                          >
                             {player.nickname}
                           </span>
                           {player.isHost && <Crown className="w-3 h-3 text-[#D4AF37]" />}

@@ -10,6 +10,7 @@ interface Props {
   onReadyToggle: (isReady: boolean) => void;
   onStartGame: () => void;
   onLeaveRoom: () => void;
+  onInspectPlayer?: (playerId: string) => void;
   error?: string | null;
 }
 
@@ -19,6 +20,7 @@ export const LobbyView: React.FC<Props> = ({
   onReadyToggle,
   onStartGame,
   onLeaveRoom,
+  onInspectPlayer,
   error
 }) => {
   const { playClick, playStart } = useSoundFX();
@@ -178,13 +180,17 @@ export const LobbyView: React.FC<Props> = ({
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
+                  <div
+                    onClick={() => onInspectPlayer?.(player.id)}
+                    className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+                    title="Click to view player dossier"
+                  >
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-display font-black text-black text-base sm:text-lg shadow-md shrink-0">
                       {player.nickname.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-display font-bold text-sm sm:text-base text-[#FAF8F5] max-w-[110px] sm:max-w-[140px] truncate">
+                        <span className="font-display font-bold text-sm sm:text-base text-[#FAF8F5] max-w-[110px] sm:max-w-[140px] truncate hover:text-[#D4AF37] transition-colors">
                           {player.nickname}
                         </span>
                         {isCurrentMe && (

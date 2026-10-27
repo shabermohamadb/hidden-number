@@ -11,10 +11,12 @@ export const GamePhase = {
 };
 
 export class GameEngine {
-  constructor(roomCode, hostId, settings = {}, io) {
+  constructor(roomCode, hostId, settings = {}, io, profileManager = null) {
     this.roomCode = roomCode;
     this.hostId = hostId;
     this.io = io;
+    this.profileManager = profileManager;
+    this.matchId = crypto.randomUUID();
     this.antiCheat = new AntiCheat();
 
     // Configurable Settings with defaults
@@ -451,6 +453,16 @@ export class GameEngine {
         : `Round ${this.currentRound} complete. Next round ready.`
     );
 
+    // Server-authoritative match recording & XP progression
+    if (isMatchOver && this.profileManager) {
+      this.profileManager.recordMatchResult({
+        matchId: this.matchId,
+        roomCode: this.roomCode,
+        results: this.roundData.results,
+        timestamp: Date.now()
+      });
+    }
+
     // Broadcast results to all players
     this.broadcastTailoredState();
   }
@@ -467,7 +479,8 @@ export class GameEngine {
     }
 
     if (this.phase === GamePhase.COMPLETED) {
-      // Rematch: Reset cumulative scores and start round 1
+      // Rematch: Reset cumulative scores, generate fresh matchId and start round 1
+      this.matchId = crypto.randomUUID();
       for (const [playerId] of this.players) {
         this.cumulativeScores.set(playerId, 0);
         this.exactGuessCounts.set(playerId, 0);

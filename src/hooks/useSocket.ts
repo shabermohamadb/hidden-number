@@ -2,8 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { GameState, GameMessage, Answer, Player } from '../types/game';
-
-const SOCKET_SERVER_URL = window.location.origin;
+import { getServerUrl } from '../config/serverUrl';
 
 export function useSocket() {
   const socketRef = useRef<Socket | null>(null);
@@ -12,6 +11,7 @@ export function useSocket() {
   const [queueStatus, setQueueStatus] = useState<{ status: 'IDLE' | 'SEARCHING' | 'MATCHED'; queueLength?: number; matchedRoomCode?: string }>({ status: 'IDLE' });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [connectNonce, setConnectNonce] = useState<number>(0);
 
   // Session persistence in localStorage
   const getSession = () => {
@@ -32,8 +32,9 @@ export function useSocket() {
   };
 
   useEffect(() => {
+    const serverUrl = getServerUrl();
     const session = getSession();
-    const socket = io(SOCKET_SERVER_URL, {
+    const socket = io(serverUrl, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
@@ -163,6 +164,10 @@ export function useSocket() {
     return () => {
       socket.disconnect();
     };
+  }, [connectNonce]);
+
+  const reconnect = useCallback(() => {
+    setConnectNonce(n => n + 1);
   }, []);
 
   // Actions
@@ -325,7 +330,8 @@ export function useSocket() {
     submitAnswer,
     submitGuess,
     nextRound,
-    returnToLobby
+    returnToLobby,
+    reconnect
   };
 }
 

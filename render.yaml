@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: hidden-number-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: CLIENT_URL
+        value: https://hidden-number.vercel.app

@@ -13,6 +13,7 @@ interface Props {
   onOpenHowToPlay: () => void;
   onOpenRules: () => void;
   onOpenProfile: () => void;
+  onOpenServerConfig: () => void;
 }
 
 export const NavigationHeader: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const NavigationHeader: React.FC<Props> = ({
   onOpenHowToPlay,
   onOpenRules,
   onOpenProfile,
+  onOpenServerConfig,
 }) => {
   const { isMuted, toggleMute, sfxVolume, setSfxVolume, musicVolume, setMusicVolume, playClick } = useSoundFX();
   const [showAudioPopover, setShowAudioPopover] = useState(false);
@@ -88,23 +90,31 @@ export const NavigationHeader: React.FC<Props> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Connection status */}
-        <div
-          title={connected ? 'Connected to server' : 'Disconnected'}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono"
+        {/* Connection status (clickable to configure backend) */}
+        <button
+          onClick={() => {
+            playClick();
+            onOpenServerConfig();
+          }}
+          title={connected ? 'Connected to server (click to view settings)' : 'Disconnected (click to connect backend)'}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono transition-all hover:scale-105 ${
+            connected
+              ? 'bg-emerald-950/40 border-emerald-500/30 hover:bg-emerald-900/40'
+              : 'bg-rose-950/60 border-rose-500/50 hover:bg-rose-900/60 animate-pulse'
+          }`}
         >
           {connected ? (
             <>
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="hidden md:inline text-emerald-400 text-[11px]">ONLINE</span>
+              <span className="text-emerald-400 text-[11px] font-bold">ONLINE</span>
             </>
           ) : (
             <>
               <div className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-              <span className="hidden md:inline text-rose-400 text-[11px]">OFFLINE</span>
+              <span className="text-rose-300 text-[11px] font-bold">OFFLINE (CONNECT)</span>
             </>
           )}
-        </div>
+        </button>
 
         {/* Audio Toggle & Popover */}
         <div className="relative">

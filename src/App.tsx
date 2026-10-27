@@ -10,6 +10,7 @@ import { CreateRoomModal } from './components/landing/CreateRoomModal';
 import { JoinRoomModal } from './components/landing/JoinRoomModal';
 import { ProfileDrawer } from './components/profile/ProfileDrawer';
 import { MatchmakingOverlay } from './components/matchmaking/MatchmakingOverlay';
+import { ServerConfigModal } from './components/common/ServerConfigModal';
 import { LobbyView } from './components/lobby/LobbyView';
 import { GameArenaView } from './components/game/GameArenaView';
 import { ResultsView } from './components/results/ResultsView';
@@ -33,7 +34,8 @@ export function App() {
     submitAnswer,
     submitGuess,
     nextRound,
-    returnToLobby
+    returnToLobby,
+    reconnect
   } = useSocket();
 
   // Local user profile
@@ -50,6 +52,7 @@ export function App() {
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [joinRoomOpen, setJoinRoomOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [serverConfigOpen, setServerConfigOpen] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
   // Check URL parameters for invitation links (?room=XYZ)
@@ -137,13 +140,20 @@ export function App() {
         onOpenHowToPlay={() => setHowToPlayOpen(true)}
         onOpenRules={() => setRulesOpen(true)}
         onOpenProfile={() => setProfileOpen(true)}
+        onOpenServerConfig={() => setServerConfigOpen(true)}
       />
 
-      {/* Error alert toast */}
+      {/* Error alert toast with Connect button */}
       {error && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs font-mono shadow-2xl backdrop-blur-md flex items-center justify-between gap-4 animate-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-rose-950/95 border border-rose-500/50 text-rose-200 text-xs font-mono shadow-2xl backdrop-blur-md flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
           <span>{error}</span>
-          <button onClick={clearError} className="text-white hover:text-rose-400 font-bold">✕</button>
+          <button
+            onClick={() => setServerConfigOpen(true)}
+            className="px-2.5 py-1 rounded-lg bg-rose-500/30 hover:bg-rose-500/50 text-white font-bold transition-all underline"
+          >
+            Connect Server
+          </button>
+          <button onClick={clearError} className="text-white hover:text-rose-400 font-bold ml-1">✕</button>
         </div>
       )}
 
@@ -226,6 +236,12 @@ export function App() {
         nickname={nickname}
         avatar={avatar}
         onSaveProfile={handleSaveProfile}
+      />
+
+      <ServerConfigModal
+        isOpen={serverConfigOpen}
+        onClose={() => setServerConfigOpen(false)}
+        onReconnected={reconnect}
       />
 
       {queueStatus.status === 'SEARCHING' && (

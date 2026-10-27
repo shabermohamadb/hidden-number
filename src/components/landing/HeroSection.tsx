@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Plus, KeyRound, HelpCircle, BookOpen, Users, Lock, RefreshCw } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
+import { getServerUrl } from '../../config/serverUrl';
 
 interface Props {
   onPlayNow: () => void;
@@ -35,7 +36,8 @@ export const HeroSection: React.FC<Props> = ({
   const fetchRooms = async () => {
     try {
       setLoadingRooms(true);
-      const res = await fetch('/api/rooms');
+      const serverUrl = getServerUrl();
+      const res = await fetch(`${serverUrl}/api/rooms`);
       if (res.ok) {
         const data = await res.json();
         setPublicRooms(data.rooms || []);

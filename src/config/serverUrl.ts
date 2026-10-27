@@ -14,12 +14,17 @@ export function getServerUrl(): string {
   }
 
   // 3. In local dev, if on Vite port 5173 and no VITE_SERVER_URL, default to localhost:3001
-  if (window.location.hostname === 'localhost' && window.location.port === '5173') {
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
     return 'http://localhost:3001';
   }
 
-  // 4. Default to current host
-  return window.location.origin;
+  // 4. If hosted on Vercel and no override set, automatically connect to the Render backend!
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://hidden-number.onrender.com';
+  }
+
+  // 5. Default to current host (works directly on Render when serving dist)
+  return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
 }
 
 export function setServerUrl(url: string): void {
@@ -29,4 +34,3 @@ export function setServerUrl(url: string): void {
     localStorage.setItem('hn_server_url', url.trim().replace(/\/+$/, ''));
   }
 }
-

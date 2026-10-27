@@ -456,14 +456,115 @@ io.on('connection', (socket) => {
   });
 });
 
-// Serve static client bundle if built
-if (fs.existsSync(distPath)) {
+// Serve static client bundle if built, or provide a rich server status dashboard
+if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html'))) {
   app.use(express.static(distPath));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
       return next();
     }
     res.sendFile(path.join(distPath, 'index.html'));
+  });
+} else {
+  // Graceful fallback for root route so users never see "Cannot GET /"
+  app.get('/', (req, res) => {
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIDDEN NUMBER — Server Online</title>
+  <style>
+    body {
+      background: #07080B;
+      color: #FAF8F5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #0D1017;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 28px;
+      padding: 44px 36px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.85);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 9999px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: #34D399; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    h1 {
+      color: #FAF8F5;
+      font-size: 26px;
+      margin: 0 0 10px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+    h1 span { color: #D4AF37; }
+    p {
+      color: #A7A29A;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 24px;
+    }
+    .actions { display: flex; flex-direction: column; gap: 12px; }
+    .btn-gold {
+      display: block;
+      background: linear-gradient(135deg, #9A7B38, #D4AF37, #8C6D34);
+      color: #000;
+      text-decoration: none;
+      font-weight: 800;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-size: 14px;
+      transition: transform 0.15s ease;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+    }
+    .btn-gold:hover { transform: scale(1.02); }
+    .btn-sub {
+      display: inline-block;
+      color: #D4AF37;
+      text-decoration: none;
+      font-size: 12px;
+      font-family: monospace;
+      margin-top: 10px;
+    }
+    .btn-sub:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge"><div class="pulse"></div> SERVER ONLINE & READY</div>
+    <h1>HIDDEN <span>NUMBER</span></h1>
+    <p>The multiplayer WebSocket backend is running live and accepting client connections.</p>
+    <div class="actions">
+      <a href="https://hidden-number.vercel.app" class="btn-gold">Launch Arena on Vercel &rarr;</a>
+      <a href="/api/health" class="btn-sub">View API Health Status (/api/health)</a>
+    </div>
+  </div>
+</body>
+</html>`);
   });
 }
 

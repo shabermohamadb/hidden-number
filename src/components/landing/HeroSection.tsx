@@ -56,20 +56,20 @@ export const HeroSection: React.FC<Props> = ({
   }, []);
 
   return (
-    <div className="relative min-h-[calc(100vh-65px)] flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto text-center z-10">
+    <div className="relative min-h-[calc(100vh-65px)] flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-8 max-w-5xl mx-auto text-center z-10">
       {/* Visual Accent Badge */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-medium mb-6 shadow-lg shadow-cyan-500/10 animate-pulse">
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-[10px] sm:text-xs font-mono font-medium mb-4 sm:mb-6 shadow-lg shadow-cyan-500/10 animate-pulse">
         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
         <span>THREE.JS MULTIPLAYER DEDUCTION ARENA</span>
       </div>
 
       {/* Hero Title */}
-      <h1 className="font-display font-black text-5xl sm:text-7xl md:text-8xl tracking-tight text-white mb-4 drop-shadow-2xl">
+      <h1 className="font-display font-black text-4xl sm:text-7xl md:text-8xl tracking-tight text-white mb-3 sm:mb-4 drop-shadow-2xl">
         HIDDEN <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-violet-400">NUMBER</span>
       </h1>
 
       {/* Hero Tagline */}
-      <p className="font-sans text-lg sm:text-2xl text-slate-300 font-light max-w-2xl mb-8 tracking-wide">
+      <p className="font-sans text-base sm:text-2xl text-slate-300 font-light max-w-2xl mb-6 sm:mb-8 tracking-wide px-2">
         Everyone in the arena knows your number. <br className="hidden sm:inline" />
         <span className="text-cyan-300 font-medium">Except you.</span>
       </p>

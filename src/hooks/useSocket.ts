@@ -13,12 +13,12 @@ export function useSocket() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [connectNonce, setConnectNonce] = useState<number>(0);
 
-  // Session persistence in localStorage
-  const getSession = () => {
+  // Session persistence in localStorage (NEVER generates a new player on reload!)
+  const getSession = useCallback(() => {
     let sid = localStorage.getItem('hn_session_id');
     let pid = localStorage.getItem('hn_player_id');
-    let nick = localStorage.getItem('hn_nickname') || `Player_${Math.floor(1000 + Math.random() * 9000)}`;
-    let avatar = localStorage.getItem('hn_avatar') || 'avatar-1';
+    let nick = localStorage.getItem('hn_nickname');
+    let avatar = localStorage.getItem('hn_avatar');
 
     if (!sid) {
       sid = crypto.randomUUID();
@@ -28,8 +28,16 @@ export function useSocket() {
       pid = crypto.randomUUID();
       localStorage.setItem('hn_player_id', pid);
     }
+    if (!nick) {
+      nick = `Player_${Math.floor(1000 + Math.random() * 9000)}`;
+      localStorage.setItem('hn_nickname', nick);
+    }
+    if (!avatar) {
+      avatar = 'avatar-1';
+      localStorage.setItem('hn_avatar', avatar);
+    }
     return { sessionId: sid, playerId: pid, nickname: nick, avatar };
-  };
+  }, []);
 
   useEffect(() => {
     const serverUrl = getServerUrl();
@@ -50,7 +58,12 @@ export function useSocket() {
       // Initialize session
       socket.emit('session:init', session, () => {
         // Attempt to resume previous room if present
-        socket.emit('session:resume', { sessionId: session.sessionId }, (res: { success: boolean; state?: GameState }) => {
+        socket.emit('session:resume', {
+          sessionId: session.sessionId,
+          playerId: session.playerId,
+          nickname: session.nickname,
+          avatar: session.avatar
+        }, (res: { success: boolean; state?: GameState }) => {
           if (res?.success && res.state) {
             setGameState(res.state);
           }
@@ -176,8 +189,15 @@ export function useSocket() {
       if (!socketRef.current) return resolve({ success: false, error: 'Socket disconnected' });
       localStorage.setItem('hn_nickname', nickname);
       localStorage.setItem('hn_avatar', avatar);
+      const session = getSession();
 
-      socketRef.current.emit('room:create', { nickname, avatar, settings }, (res: { success: boolean; roomCode?: string; room?: GameState; error?: string }) => {
+      socketRef.current.emit('room:create', {
+        nickname,
+        avatar,
+        settings,
+        playerId: session.playerId,
+        sessionId: session.sessionId
+      }, (res: { success: boolean; roomCode?: string; room?: GameState; error?: string }) => {
         if (res.success && res.room) {
           setGameState(res.room);
           resolve({ success: true, roomCode: res.roomCode });
@@ -187,15 +207,23 @@ export function useSocket() {
         }
       });
     });
-  }, []);
+  }, [getSession]);
 
   const joinRoom = useCallback((roomCode: string, nickname: string, avatar: string, password?: string) => {
     return new Promise<{ success: boolean; roomCode?: string; error?: string }>((resolve) => {
       if (!socketRef.current) return resolve({ success: false, error: 'Socket disconnected' });
       localStorage.setItem('hn_nickname', nickname);
       localStorage.setItem('hn_avatar', avatar);
+      const session = getSession();
 
-      socketRef.current.emit('room:join', { roomCode, nickname, avatar, password }, (res: { success: boolean; roomCode?: string; room?: GameState; error?: string }) => {
+      socketRef.current.emit('room:join', {
+        roomCode,
+        nickname,
+        avatar,
+        password,
+        playerId: session.playerId,
+        sessionId: session.sessionId
+      }, (res: { success: boolean; roomCode?: string; room?: GameState; error?: string }) => {
         if (res.success && res.room) {
           setGameState(res.room);
           resolve({ success: true, roomCode: res.roomCode });
@@ -205,7 +233,7 @@ export function useSocket() {
         }
       });
     });
-  }, []);
+  }, [getSession]);
 
   const leaveRoom = useCallback(() => {
     return new Promise<void>((resolve) => {
@@ -219,20 +247,41 @@ export function useSocket() {
 
   const setReady = useCallback((isReady: boolean) => {
     if (!socketRef.current) return;
-    socketRef.current.emit('room:ready', { isReady });
-  }, []);
+    const session = getSession();
+
+    // Optimistic UI update so the button immediately toggles!
+    setGameState(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        players: prev.players.map(p =>
+          (p.id === session.playerId || p.nickname === session.nickname) ? { ...p, isReady } : p
+        )
+      };
+    });
+
+    socketRef.current.emit('room:ready', {
+      isReady,
+      roomCode: gameState?.roomCode,
+      playerId: session.playerId
+    });
+  }, [getSession, gameState?.roomCode]);
 
   const startGame = useCallback(() => {
     return new Promise<{ success: boolean; error?: string }>((resolve) => {
       if (!socketRef.current) return resolve({ success: false, error: 'Socket disconnected' });
-      socketRef.current.emit('room:start', (res: { success: boolean; error?: string }) => {
-        if (!res.success) {
-          setError(res.error || 'Cannot start game');
+      const session = getSession();
+      socketRef.current.emit('room:start', {
+        roomCode: gameState?.roomCode,
+        playerId: session.playerId
+      }, (res: { success: boolean; error?: string }) => {
+        if (!res?.success) {
+          setError(res?.error || 'Cannot start game');
         }
-        resolve(res);
+        resolve(res || { success: false });
       });
     });
-  }, []);
+  }, [getSession, gameState?.roomCode]);
 
   const joinMatchmaking = useCallback((nickname: string, avatar: string) => {
     return new Promise<{ success: boolean }>((resolve) => {

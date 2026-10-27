@@ -29,3 +29,4 @@ export function setServerUrl(url: string): void {
     localStorage.setItem('hn_server_url', url.trim().replace(/\/+$/, ''));
   }
 }
+

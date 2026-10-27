@@ -29,8 +29,8 @@ export const FinalGuessModal: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in zoom-in-95 duration-200">
-      <div className="relative w-full max-w-lg bg-[#0B0F19] border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/20 text-center overflow-hidden">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-[#0B0F19] border-2 border-amber-500/50 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl shadow-amber-500/20 text-center max-h-[92vh] overflow-y-auto">
         {/* Glow ambient */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 

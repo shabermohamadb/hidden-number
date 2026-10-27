@@ -48,6 +48,10 @@ export class GameEngine {
     this.lastActiveAt = Date.now();
     const existing = this.players.get(playerId);
     if (existing) {
+      if (existing.disconnectTimer) {
+        clearTimeout(existing.disconnectTimer);
+        existing.disconnectTimer = null;
+      }
       existing.connected = true;
       existing.socketId = socketId;
       existing.nickname = nickname || existing.nickname;
@@ -74,6 +78,7 @@ export class GameEngine {
       isHost,
       isReady: isHost, // Host defaults to ready
       connected: true,
+      disconnectTimer: null,
       joinedAt: Date.now()
     };
 
@@ -87,25 +92,61 @@ export class GameEngine {
   }
 
   /**
-   * Removes or disconnects a player
+   * Removes or disconnects a player (with 25s grace period on disconnect for seamless reloads)
    */
-  removePlayer(playerId) {
+  removePlayer(playerId, permanent = false) {
     this.lastActiveAt = Date.now();
     const player = this.players.get(playerId);
     if (!player) return null;
 
-    this.antiCheat.removePlayer(playerId);
+    if (player.disconnectTimer) {
+      clearTimeout(player.disconnectTimer);
+      player.disconnectTimer = null;
+    }
 
-    if (this.phase === GamePhase.LOBBY) {
+    if (permanent) {
+      this.antiCheat.removePlayer(playerId);
       this.players.delete(playerId);
       this.cumulativeScores.delete(playerId);
       this.exactGuessCounts.delete(playerId);
-    } else {
-      player.connected = false;
-      player.socketId = null;
+
+      let newHostId = null;
+      if (this.hostId === playerId) {
+        const activePlayers = Array.from(this.players.values()).filter(p => p.connected);
+        if (activePlayers.length > 0) {
+          newHostId = activePlayers[0].id;
+          this.hostId = newHostId;
+          activePlayers[0].isHost = true;
+        }
+      }
+      return { player, newHostId, remainingCount: this.players.size };
     }
 
-    // Host migration if host left
+    // Graceful disconnect (e.g. reload or temporary mobile network sleep)
+    player.connected = false;
+    player.socketId = null;
+
+    if (this.phase === GamePhase.LOBBY) {
+      // Set grace timer before removing from lobby
+      player.disconnectTimer = setTimeout(() => {
+        if (!player.connected) {
+          this.antiCheat.removePlayer(playerId);
+          this.players.delete(playerId);
+          this.cumulativeScores.delete(playerId);
+          this.exactGuessCounts.delete(playerId);
+
+          if (this.hostId === playerId) {
+            const activePlayers = Array.from(this.players.values()).filter(p => p.connected);
+            if (activePlayers.length > 0) {
+              this.hostId = activePlayers[0].id;
+              activePlayers[0].isHost = true;
+            }
+          }
+          this.broadcastTailoredState();
+        }
+      }, 25000); // 25 seconds grace
+    }
+
     let newHostId = null;
     if (this.hostId === playerId) {
       const activePlayers = Array.from(this.players.values()).filter(p => p.connected);

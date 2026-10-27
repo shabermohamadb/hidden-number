@@ -47,7 +47,7 @@ export const ResultsView: React.FC<Props> = ({
   const winner = results.matchWinner || sortedScores[0];
 
   return (
-    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-5xl mx-auto px-4 py-8 z-10 animate-in fade-in zoom-in-95 duration-300">
+    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8 z-10 animate-in fade-in zoom-in-95 duration-300">
       {/* Header Banner */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-medium mb-3">

@@ -38,12 +38,22 @@ export function App() {
     reconnect
   } = useSocket();
 
-  // Local user profile
+  // Local user profile (persistent across reloads)
   const [nickname, setNickname] = useState<string>(() => {
-    return localStorage.getItem('hn_nickname') || `Player_${Math.floor(1000 + Math.random() * 9000)}`;
+    let saved = localStorage.getItem('hn_nickname');
+    if (!saved) {
+      saved = `Player_${Math.floor(1000 + Math.random() * 9000)}`;
+      localStorage.setItem('hn_nickname', saved);
+    }
+    return saved;
   });
   const [avatar, setAvatar] = useState<string>(() => {
-    return localStorage.getItem('hn_avatar') || 'avatar-1';
+    let saved = localStorage.getItem('hn_avatar');
+    if (!saved) {
+      saved = 'avatar-1';
+      localStorage.setItem('hn_avatar', saved);
+    }
+    return saved;
   });
 
   // Modal states
@@ -95,6 +105,7 @@ export function App() {
     questionTime: number;
     guessTime: number;
     totalRounds: number;
+    minPlayers: number;
     maxPlayers: number;
     password?: string | null;
   }) => {

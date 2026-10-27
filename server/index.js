@@ -155,6 +155,7 @@ io.on('connection', (socket) => {
       session = { playerId: pid, nickname, avatar, roomCode: null };
       roomManager.playerSessions.set(sid, session);
     } else {
+      session.playerId = session.playerId || pid;
       session.nickname = nickname || session.nickname;
       session.avatar = avatar || session.avatar;
     }
@@ -163,15 +164,27 @@ io.on('connection', (socket) => {
       callback({
         success: true,
         sessionId: sid,
-        playerId: pid,
+        playerId: session.playerId,
         roomCode: session.roomCode
       });
     }
   });
 
   // 2. Session Resume after page refresh or network drop
-  socket.on('session:resume', ({ sessionId }, callback) => {
-    const session = roomManager.playerSessions.get(sessionId);
+  socket.on('session:resume', ({ sessionId, playerId, nickname, avatar }, callback) => {
+    let session = sessionId ? roomManager.playerSessions.get(sessionId) : null;
+    
+    // Fallback: If not in session map, recover by playerId across rooms
+    if ((!session || !session.roomCode) && playerId) {
+      for (const [code, g] of roomManager.rooms) {
+        if (g.players.has(playerId)) {
+          session = { playerId, nickname, avatar, roomCode: code };
+          if (sessionId) roomManager.playerSessions.set(sessionId, session);
+          break;
+        }
+      }
+    }
+
     if (!session || !session.roomCode) {
       if (callback) callback({ success: false, error: 'No active session found' });
       return;
@@ -184,10 +197,10 @@ io.on('connection', (socket) => {
       return;
     }
 
-    currentSessionId = sessionId;
+    currentSessionId = sessionId || currentSessionId;
     currentPlayerId = session.playerId;
     currentRoomCode = session.roomCode;
-    roomManager.socketToSession.set(socket.id, sessionId);
+    if (sessionId) roomManager.socketToSession.set(socket.id, sessionId);
 
     socket.join(game.roomCode);
     game.addPlayer(session.playerId, session.nickname, session.avatar, socket.id);
@@ -207,19 +220,25 @@ io.on('connection', (socket) => {
   });
 
   // 3. Create Room
-  socket.on('room:create', ({ nickname, avatar, settings }, callback) => {
-    if (!currentPlayerId) currentPlayerId = crypto.randomUUID();
-    const game = roomManager.createRoom(currentPlayerId, nickname, avatar, settings, socket.id);
+  socket.on('room:create', ({ nickname, avatar, settings, playerId, sessionId }, callback) => {
+    const pid = playerId || currentPlayerId || crypto.randomUUID();
+    currentPlayerId = pid;
+    if (sessionId) currentSessionId = sessionId;
+
+    const game = roomManager.createRoom(pid, nickname, avatar, settings, socket.id);
 
     currentRoomCode = game.roomCode;
     socket.join(game.roomCode);
 
     if (currentSessionId) {
       const session = roomManager.playerSessions.get(currentSessionId);
-      if (session) session.roomCode = game.roomCode;
+      if (session) {
+        session.roomCode = game.roomCode;
+        session.playerId = pid;
+      }
     }
 
-    const state = game.getTailoredState(currentPlayerId);
+    const state = game.getTailoredState(pid);
 
     if (callback) {
       callback({
@@ -233,9 +252,12 @@ io.on('connection', (socket) => {
   });
 
   // 4. Join Room
-  socket.on('room:join', ({ roomCode, nickname, avatar, password }, callback) => {
-    if (!currentPlayerId) currentPlayerId = crypto.randomUUID();
-    const result = roomManager.joinRoom(roomCode, currentPlayerId, nickname, avatar, password, socket.id);
+  socket.on('room:join', ({ roomCode, nickname, avatar, password, playerId, sessionId }, callback) => {
+    const pid = playerId || currentPlayerId || crypto.randomUUID();
+    currentPlayerId = pid;
+    if (sessionId) currentSessionId = sessionId;
+
+    const result = roomManager.joinRoom(roomCode, pid, nickname, avatar, password, socket.id);
 
     if (!result.success) {
       if (callback) callback({ success: false, error: result.error });
@@ -248,10 +270,13 @@ io.on('connection', (socket) => {
 
     if (currentSessionId) {
       const session = roomManager.playerSessions.get(currentSessionId);
-      if (session) session.roomCode = game.roomCode;
+      if (session) {
+        session.roomCode = game.roomCode;
+        session.playerId = pid;
+      }
     }
 
-    const state = game.getTailoredState(currentPlayerId);
+    const state = game.getTailoredState(pid);
 
     if (callback) {
       callback({
@@ -269,25 +294,57 @@ io.on('connection', (socket) => {
   });
 
   // 5. Ready state toggle in lobby
-  socket.on('room:ready', ({ isReady }, callback) => {
-    if (!currentRoomCode || !currentPlayerId) return;
-    const game = roomManager.getRoom(currentRoomCode);
-    if (!game) return;
+  socket.on('room:ready', (data, callback) => {
+    const cb = typeof data === 'function' ? data : callback;
+    const isReady = typeof data === 'object' ? data.isReady : true;
+    const rCode = (typeof data === 'object' && data.roomCode) || currentRoomCode;
+    const pId = (typeof data === 'object' && data.playerId) || currentPlayerId;
 
-    const ok = game.setPlayerReady(currentPlayerId, isReady);
-    if (callback) callback({ success: ok });
+    if (!rCode || !pId) {
+      if (cb) cb({ success: false, error: 'Missing room or player identifier' });
+      return;
+    }
+
+    const game = roomManager.getRoom(rCode);
+    if (!game) {
+      if (cb) cb({ success: false, error: 'Room not found' });
+      return;
+    }
+
+    const ok = game.setPlayerReady(pId, isReady);
+    if (cb) cb({ success: ok });
 
     game.broadcastTailoredState();
   });
 
   // 6. Host starts game
-  socket.on('room:start', (callback) => {
-    if (!currentRoomCode || !currentPlayerId) return;
-    const game = roomManager.getRoom(currentRoomCode);
-    if (!game) return;
+  socket.on('room:start', (data, callback) => {
+    const cb = typeof data === 'function' ? data : callback;
+    const rCode = (typeof data === 'object' && data?.roomCode) || currentRoomCode;
+    const pId = (typeof data === 'object' && data?.playerId) || currentPlayerId;
 
-    const canStart = game.canStartGame(currentPlayerId);
+    if (!rCode || !pId) {
+      if (cb) cb({ success: false, error: 'Missing room or player identifier' });
+      return;
+    }
+
+    const game = roomManager.getRoom(rCode);
+    if (!game) {
+      if (cb) cb({ success: false, error: 'Room not found' });
+      return;
+    }
+
+    const canStart = game.canStartGame(pId);
     if (!canStart.canStart) {
+      if (cb) cb({ success: false, error: canStart.error });
+      return;
+    }
+
+    game.startRound(1);
+    game.broadcastTailoredState();
+
+    if (cb) cb({ success: true });
+  });
       if (callback) callback({ success: false, error: canStart.error });
       return;
     }
@@ -374,7 +431,7 @@ io.on('connection', (socket) => {
       const game = roomManager.getRoom(currentRoomCode);
       if (game) {
         socket.leave(game.roomCode);
-        const res = game.removePlayer(currentPlayerId);
+        const res = game.removePlayer(currentPlayerId, true); // Permanent removal
         if (res) {
           io.to(game.roomCode).emit('room:player-left', {
             playerId: currentPlayerId,
@@ -392,7 +449,7 @@ io.on('connection', (socket) => {
     if (callback) callback({ success: true });
   });
 
-  // 15. Disconnect
+  // 15. Disconnect (Graceful - keeps room membership for 25s during reload)
   socket.on('disconnect', () => {
     if (currentPlayerId) {
       matchmaker.removeFromQueue(currentPlayerId);
@@ -400,14 +457,8 @@ io.on('connection', (socket) => {
     if (currentRoomCode && currentPlayerId) {
       const game = roomManager.getRoom(currentRoomCode);
       if (game) {
-        const res = game.removePlayer(currentPlayerId);
-        if (res) {
-          io.to(game.roomCode).emit('room:player-left', {
-            playerId: currentPlayerId,
-            newHostId: res.newHostId
-          });
-          game.broadcastTailoredState();
-        }
+        game.removePlayer(currentPlayerId, false); // Graceful 25s disconnect
+        game.broadcastTailoredState();
       }
     }
     roomManager.socketToSession.delete(socket.id);

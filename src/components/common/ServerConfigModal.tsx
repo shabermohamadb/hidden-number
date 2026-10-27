@@ -180,3 +180,4 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
     </div>
   );
 };
+

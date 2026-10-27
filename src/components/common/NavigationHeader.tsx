@@ -41,30 +41,30 @@ export const NavigationHeader: React.FC<Props> = ({
   };
 
   return (
-    <header className="relative z-30 w-full px-4 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/5 bg-[#06080F]/80 backdrop-blur-md">
+    <header className="relative z-30 w-full px-3 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between border-b border-white/5 bg-[#06080F]/90 backdrop-blur-md">
       {/* Brand Logo & Tagline */}
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40">
-          <span className="font-display font-black text-xl text-white">?</span>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40 shrink-0">
+          <span className="font-display font-black text-lg sm:text-xl text-white">?</span>
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <span className="font-display font-black tracking-wider text-lg sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-200">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="font-display font-black tracking-wider text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-200">
               HIDDEN NUMBER
             </span>
             <span className="hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
               Arena v1.0
             </span>
           </div>
-          <p className="hidden sm:block text-[11px] text-slate-400 font-sans">
+          <p className="hidden md:block text-[11px] text-slate-400 font-sans">
             Everyone knows your number. Except you.
           </p>
         </div>
       </div>
 
-      {/* Center Room / Round Status if active */}
+      {/* Center Room / Round Status if active (desktop) */}
       {roomCode && (
-        <div className="flex items-center gap-2 sm:gap-4 bg-slate-900/80 border border-white/10 px-3 py-1.5 rounded-xl shadow-inner">
+        <div className="hidden md:flex items-center gap-2 sm:gap-4 bg-slate-900/80 border border-white/10 px-3 py-1.5 rounded-xl shadow-inner">
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-slate-400 uppercase font-mono">Room:</span>
             <button
@@ -89,7 +89,7 @@ export const NavigationHeader: React.FC<Props> = ({
       )}
 
       {/* Right Controls */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         {/* Connection status (clickable to configure backend) */}
         <button
           onClick={() => {

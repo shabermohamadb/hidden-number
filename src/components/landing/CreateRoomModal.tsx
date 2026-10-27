@@ -11,6 +11,7 @@ interface Props {
     questionTime: number;
     guessTime: number;
     totalRounds: number;
+    minPlayers: number;
     maxPlayers: number;
     password?: string | null;
   }) => void;
@@ -22,6 +23,7 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [questionTime, setQuestionTime] = useState<number>(60);
   const [totalRounds, setTotalRounds] = useState<number>(3);
+  const [minPlayers, setMinPlayers] = useState<number>(2);
   const [maxPlayers, setMaxPlayers] = useState<number>(8);
   const [password, setPassword] = useState<string>('');
 
@@ -35,6 +37,7 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
       questionTime,
       guessTime: 15,
       totalRounds,
+      minPlayers,
       maxPlayers,
       password: visibility === 'private' && password.trim() ? password.trim() : null
     });
@@ -165,6 +168,33 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                   }`}
                 >
                   {rounds} {rounds === 1 ? 'Round' : 'Rounds'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Minimum Players to Start */}
+          <div>
+            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Minimum Players to Start Game</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[2, 3, 4].map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  onClick={() => {
+                    playClick();
+                    setMinPlayers(count);
+                  }}
+                  className={`py-2 rounded-xl border text-xs font-mono font-semibold transition-all ${
+                    minPlayers === count
+                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200'
+                      : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                  }`}
+                >
+                  {count} Players {count === 2 ? '(1v1)' : ''}
                 </button>
               ))}
             </div>

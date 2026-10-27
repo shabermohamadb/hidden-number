@@ -345,15 +345,6 @@ io.on('connection', (socket) => {
 
     if (cb) cb({ success: true });
   });
-      if (callback) callback({ success: false, error: canStart.error });
-      return;
-    }
-
-    game.startRound(1);
-    game.broadcastTailoredState();
-
-    if (callback) callback({ success: true });
-  });
 
   // 7. Public Matchmaking: Join
   socket.on('matchmaking:join', ({ nickname, avatar }, callback) => {

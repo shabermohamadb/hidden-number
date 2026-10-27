@@ -715,14 +715,17 @@ if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html')))
     res.sendFile(path.join(distPath, 'index.html'));
   });
 } else {
-  // Graceful fallback for root route so users never see "Cannot GET /"
-  app.get('/', (req, res) => {
+  // Graceful fallback for all routes so users never see "Cannot GET /"
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
+      return next();
+    }
     res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HIDDEN NUMBER — Server Online</title>
+  <title>HIDDEN NUMBER — Server Online & Ready</title>
   <style>
     body {
       background: #07080B;
@@ -741,7 +744,7 @@ if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html')))
       border: 1px solid rgba(212, 175, 55, 0.4);
       border-radius: 28px;
       padding: 44px 36px;
-      max-width: 520px;
+      max-width: 540px;
       width: 100%;
       text-align: center;
       box-shadow: 0 25px 60px rgba(0,0,0,0.85);
@@ -765,10 +768,10 @@ if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html')))
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     h1 {
       color: #FAF8F5;
-      font-size: 26px;
+      font-size: 28px;
       margin: 0 0 10px;
       font-weight: 900;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
     }
     h1 span { color: #D4AF37; }
     p {
@@ -804,11 +807,11 @@ if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html')))
 </head>
 <body>
   <div class="card">
-    <div class="badge"><div class="pulse"></div> SERVER ONLINE & READY</div>
+    <div class="badge"><div class="pulse"></div> MULTIPLAYER BACKEND ACTIVE & READY</div>
     <h1>HIDDEN <span>NUMBER</span></h1>
-    <p>The multiplayer WebSocket backend is running live and accepting client connections.</p>
+    <p>The real-time WebSocket backend is online and accepting player room connections from Vercel.</p>
     <div class="actions">
-      <a href="https://hidden-number.vercel.app" class="btn-gold">Launch Arena on Vercel &rarr;</a>
+      <a href="https://hidden-number.vercel.app" class="btn-gold">Launch Game on Vercel Arena &rarr;</a>
       <a href="/api/health" class="btn-sub">View API Health Status (/api/health)</a>
     </div>
   </div>

@@ -24,6 +24,53 @@ export interface RoomSettings {
   totalRounds: number;  // default 3
   visibility: 'public' | 'private';
   password?: string | null;
+  turnPolicy?: 'round_robin' | 'free_for_all';
+  questionAnswerTime?: number;
+  askQuestionTime?: number;
+}
+
+export interface ActiveQuestionAnswer {
+  playerId: string;
+  nickname: string;
+  avatar: string;
+  answer: 'YES' | 'NO';
+  timestamp: number;
+}
+
+export interface ActiveQuestion {
+  id: string;
+  askerId: string;
+  askerName: string;
+  askerAvatar: string;
+  content: string;
+  status: 'AWAITING_ANSWERS' | 'RESOLVED';
+  createdAt: number;
+  answerDeadline: number;
+  remainingAnswerSeconds: number;
+  answers: ActiveQuestionAnswer[];
+  totalRequiredAnswers: number;
+  answeredCount: number;
+  isAsker: boolean;
+  myAnswer: 'YES' | 'NO' | null;
+}
+
+export interface TurnOrderEntry {
+  playerId: string;
+  nickname: string;
+  avatar: string;
+  connected: boolean;
+  isCurrent: boolean;
+}
+
+export interface TurnState {
+  currentAskerId: string | null;
+  currentAskerName: string | null;
+  turnOrder: TurnOrderEntry[];
+  isMyTurnToAsk: boolean;
+  canAnswerActiveQuestion: boolean;
+  hasAnsweredActiveQuestion: boolean;
+  askDeadline?: number | null;
+  remainingAskSeconds?: number;
 }
 
 export interface Answer {
@@ -90,6 +137,9 @@ export interface GameState {
   messages: GameMessage[];
   mySubmittedGuess: number | null;
   results: GameResults | null;
+  activeQuestion?: ActiveQuestion | null;
+  turnState?: TurnState;
+  questionHistory?: ActiveQuestion[];
 }
 
 export interface UserStats {

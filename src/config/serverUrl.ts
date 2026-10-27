@@ -2,9 +2,19 @@
 
 export function getServerUrl(): string {
   // 1. User custom override in localStorage
-  const localOverride = localStorage.getItem('hn_server_url');
-  if (localOverride && localOverride.trim()) {
-    return localOverride.trim().replace(/\/+$/, '');
+  if (typeof window !== 'undefined') {
+    const localOverride = localStorage.getItem('hn_server_url');
+    if (localOverride && localOverride.trim()) {
+      const trimmed = localOverride.trim().replace(/\/+$/, '');
+      const isRemoteHost = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      
+      // Auto-purge invalid local overrides that break remote players
+      if (isRemoteHost && (trimmed.includes('localhost') || trimmed.includes('127.0.0.1') || trimmed.includes('vercel.app'))) {
+        localStorage.removeItem('hn_server_url');
+      } else {
+        return trimmed;
+      }
+    }
   }
 
   // 2. Environment variable injected at build/runtime (Vercel)

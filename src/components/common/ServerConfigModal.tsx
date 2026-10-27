@@ -57,7 +57,7 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
   const handleResetToDefault = () => {
     playClick();
     setServerUrl('');
-    setUrl(window.location.origin);
+    setUrl(getServerUrl());
     onReconnected();
   };
 
@@ -117,6 +117,30 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
                 className="px-4 py-2.5 rounded-xl bg-[#181E2C] hover:bg-[#222A3E] border border-[#C5A059]/30 text-xs font-mono font-bold text-[#D4AF37] transition-all disabled:opacity-40"
               >
                 {testing ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Test'}
+              </button>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="text-[11px] text-[#A7A29A] font-mono">Quick Presets:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setUrl('https://hidden-number.onrender.com');
+                  setTestResult(null);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#181E2C] hover:bg-[#222A3E] border border-[#C5A059]/20 text-[11px] font-mono text-[#F3E5AB] transition-colors"
+              >
+                Render Cloud (hidden-number.onrender.com)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUrl('http://localhost:3001');
+                  setTestResult(null);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#181E2C] hover:bg-[#222A3E] border border-[#C5A059]/20 text-[11px] font-mono text-[#A7A29A] hover:text-[#F3E5AB] transition-colors"
+              >
+                Localhost:3001
               </button>
             </div>
           </div>

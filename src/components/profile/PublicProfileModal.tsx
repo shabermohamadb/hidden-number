@@ -412,3 +412,4 @@ export const PublicProfileModal: React.FC<Props> = ({
     </div>
   );
 };
+

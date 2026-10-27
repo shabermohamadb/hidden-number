@@ -76,8 +76,10 @@ describe('Multiplayer E2E Socket.IO Simulation (3 Concurrent Clients)', () => {
   });
 
   after(() => {
-    if (activeGame && activeGame.timer) {
-      clearTimeout(activeGame.timer);
+    if (activeGame) {
+      if (activeGame.timer) clearTimeout(activeGame.timer);
+      if (activeGame.askerTimeoutTimer) clearTimeout(activeGame.askerTimeoutTimer);
+      if (activeGame.questionAnswerTimer) clearTimeout(activeGame.questionAnswerTimer);
     }
     clientSockets.forEach(s => s.disconnect());
     ioServer.close();

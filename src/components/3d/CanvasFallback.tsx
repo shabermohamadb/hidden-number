@@ -25,32 +25,32 @@ export const CanvasFallback: React.FC<Props> = ({ isUrgent = false }) => {
     };
     window.addEventListener('resize', handleResize);
 
-    // Warm Gold & Bronze Particle Nodes
-    const particleCount = 50;
+    // Subtle Muted Particle Nodes
+    const particleCount = 40;
     const particles = Array.from({ length: particleCount }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
       size: Math.random() * 2 + 1,
-      color: Math.random() > 0.4 ? 'rgba(212, 175, 55, ' : 'rgba(197, 160, 89, '
+      color: Math.random() > 0.5 ? 'rgba(168, 198, 108, ' : 'rgba(168, 173, 167, '
     }));
 
     const render = () => {
-      ctx.fillStyle = '#07080B';
+      ctx.fillStyle = '#070B0D';
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle Radial Gold Glow in Arena Center
+      // Subtle Radial Glow in Center
       const grad = ctx.createRadialGradient(
         width / 2, height / 2, 40,
         width / 2, height / 2, Math.max(width, height) / 1.6
       );
-      grad.addColorStop(0, isUrgent ? 'rgba(229, 168, 59, 0.12)' : 'rgba(212, 175, 55, 0.08)');
-      grad.addColorStop(1, 'rgba(7, 8, 11, 0)');
+      grad.addColorStop(0, isUrgent ? 'rgba(224, 93, 82, 0.08)' : 'rgba(168, 198, 108, 0.04)');
+      grad.addColorStop(1, 'rgba(7, 11, 13, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      // Render connected antique gold particles
+      // Render connected particles
       particles.forEach((p, i) => {
         p.x += p.vx;
         p.y += p.vy;

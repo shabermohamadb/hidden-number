@@ -4,27 +4,34 @@
 
 @layer base {
   body {
-    background-color: #07080B;
-    color: #F5F2EB;
+    background-color: #070B0D;
+    color: #F1EBDD;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
-/* Custom scrollbars */
+/* Custom subtle scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(13, 16, 23, 0.6);
+  background: #070B0D;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(197, 160, 89, 0.25);
+  background: #293130;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.5);
+  background: #394341;
+}
+
+/* Subtle focus outlines */
+:focus-visible {
+  outline: 2px solid #A8C66C;
+  outline-offset: 2px;
 }

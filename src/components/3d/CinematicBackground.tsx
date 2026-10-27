@@ -31,7 +31,7 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
 
     // 2. Three.js Scene Setup (Dark Obsidian Arena)
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x07080B, 0.045);
+    scene.fog = new THREE.FogExp2(0x070B0D, 0.05);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0, 14);
@@ -40,22 +40,22 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 0.9;
     container.appendChild(renderer.domElement);
 
-    // 3. Dynamic Antique Gold & Obsidian Lighting
-    const ambientLight = new THREE.AmbientLight(0x0D1017, 2.2);
+    // 3. Dynamic Restrained Ambient Lighting
+    const ambientLight = new THREE.AmbientLight(0x101719, 1.8);
     scene.add(ambientLight);
 
-    const coreLight = new THREE.PointLight(0xD4AF37, 3.2, 28);
+    const coreLight = new THREE.PointLight(0xA8C66C, 1.2, 24);
     coreLight.position.set(0, 0, 0);
     scene.add(coreLight);
 
-    const rimLight = new THREE.DirectionalLight(0xC5A059, 1.6);
+    const rimLight = new THREE.DirectionalLight(0xC6A45A, 0.8);
     rimLight.position.set(10, 15, 10);
     scene.add(rimLight);
 
-    const amberLight = new THREE.PointLight(0xE5A83B, 0, 22);
+    const amberLight = new THREE.PointLight(0x151D1D, 0, 20);
     amberLight.position.set(0, -5, 5);
     scene.add(amberLight);
 
@@ -113,20 +113,20 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
       c.height = 256;
       const ctx = c.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = '#0D1017';
+        ctx.fillStyle = '#101719';
         ctx.fillRect(0, 0, 256, 256);
-        ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
-        ctx.lineWidth = 6;
-        ctx.strokeRect(6, 6, 244, 244);
+        ctx.strokeStyle = 'rgba(168, 198, 108, 0.4)';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(8, 8, 240, 240);
 
-        ctx.strokeStyle = 'rgba(197, 160, 89, 0.25)';
+        ctx.strokeStyle = 'rgba(41, 49, 48, 0.6)';
         ctx.lineWidth = 2;
-        ctx.strokeRect(14, 14, 228, 228);
+        ctx.strokeRect(16, 16, 224, 224);
 
         ctx.font = 'bold 112px "Space Grotesk", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#D4AF37';
+        ctx.fillStyle = '#F1EBDD';
         ctx.fillText(numStr, 128, 128);
       }
       return new THREE.CanvasTexture(c);

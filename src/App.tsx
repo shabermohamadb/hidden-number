@@ -175,8 +175,8 @@ export function App() {
   const isUrgentTimer = (gameState?.remainingSeconds ?? 100) <= 10 && (gameState?.phase === 'QUESTION_PHASE' || gameState?.phase === 'GUESSING_PHASE');
 
   return (
-    <div className="relative min-h-screen bg-[#07080B] text-[#F5F2EB] flex flex-col font-sans selection:bg-[#D4AF37]/30 selection:text-[#F3E5AB]">
-      {/* 3D Cinematic Three.js Interactive Background */}
+    <div className="relative min-h-screen bg-[#070B0D] text-[#F1EBDD] flex flex-col font-sans selection:bg-[#A8C66C]/30 selection:text-[#F1EBDD]">
+      {/* 3D Cinematic Interactive Background */}
       <CinematicBackground
         phase={gameState?.phase || 'LOBBY'}
         isUrgent={isUrgentTimer}
@@ -198,15 +198,15 @@ export function App() {
 
       {/* Error alert toast with Connect button */}
       {error && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#0D1017] border border-rose-500/60 text-rose-300 text-xs font-mono shadow-2xl backdrop-blur-md flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#101719] border border-[#E05D52]/60 text-[#E05D52] text-xs font-mono shadow-2xl backdrop-blur-md flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
           <span>{error}</span>
           <button
             onClick={() => setServerConfigOpen(true)}
-            className="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/40 text-[#F5F2EB] font-bold transition-all underline"
+            className="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-[#E05D52]/40 text-[#F1EBDD] font-bold transition-all underline"
           >
             Connect Server
           </button>
-          <button onClick={clearError} className="text-[#A7A29A] hover:text-[#FAF8F5] font-bold ml-1">✕</button>
+          <button onClick={clearError} className="text-[#A8ADA7] hover:text-[#F1EBDD] font-bold ml-1">✕</button>
         </div>
       )}
 
@@ -262,14 +262,14 @@ export function App() {
 
       {/* Floating Incoming Arena Invitation Toast */}
       {incomingRoomInvite && (
-        <div className="fixed top-20 right-6 z-50 p-4 rounded-2xl bg-[#0D1017] border border-[#D4AF37] text-[#FAF8F5] shadow-2xl backdrop-blur-md flex items-center gap-4 animate-in slide-in-from-top duration-300">
-          <div className="w-10 h-10 rounded-xl bg-[#1A1F2C] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+        <div className="fixed top-20 right-6 z-50 p-4 rounded-2xl bg-[#101719] border border-[#293130] text-[#F1EBDD] shadow-2xl backdrop-blur-md flex items-center gap-4 animate-in slide-in-from-top duration-300">
+          <div className="w-10 h-10 rounded-xl bg-[#151D1D] border border-[#293130] flex items-center justify-center text-[#A8C66C]">
             <Send className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] font-mono uppercase text-[#D4AF37] font-bold">Arena Invitation</span>
-            <div className="text-xs font-mono font-bold text-[#FAF8F5]">
-              {incomingRoomInvite.inviter.username} invited you to Arena #{incomingRoomInvite.roomCode}
+            <span className="text-[10px] font-mono uppercase text-[#A8C66C] font-bold">Room Invitation</span>
+            <div className="text-xs font-mono font-bold text-[#F1EBDD]">
+              {incomingRoomInvite.inviter.username} invited you to Room #{incomingRoomInvite.roomCode}
             </div>
           </div>
           <div className="flex items-center gap-2 ml-2">
@@ -278,13 +278,13 @@ export function App() {
                 joinRoom(incomingRoomInvite.roomCode, nickname, avatar);
                 dismissRoomInvite();
               }}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#9A7B38] to-[#D4AF37] text-black font-extrabold text-xs font-mono shadow-md"
+              className="px-3.5 py-1.5 rounded-xl bg-[#A8C66C] hover:bg-[#B8D47C] text-[#070B0D] font-bold text-xs font-mono shadow-sm"
             >
               Accept
             </button>
             <button
               onClick={dismissRoomInvite}
-              className="p-1.5 rounded-xl bg-[#131722] hover:bg-white/10 text-[#A7A29A]"
+              className="p-1.5 rounded-xl bg-[#151D1D] hover:bg-[#1E2728] text-[#A8ADA7]"
             >
               <X className="w-4 h-4" />
             </button>

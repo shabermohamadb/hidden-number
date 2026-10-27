@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { GameResults } from '../../types/game';
-import { Trophy, Award, ArrowRight, RotateCcw, Home, Sparkles } from 'lucide-react';
+import { Trophy, Menu, HelpCircle, Target, Award } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 interface Props {
@@ -34,193 +34,183 @@ export const ResultsView: React.FC<Props> = ({
       setTimeout(() => {
         playVictory();
         confetti({
-          particleCount: 120,
-          spread: 80,
+          particleCount: 80,
+          spread: 70,
           origin: { y: 0.6 },
-          colors: ['#D4AF37', '#F3E5AB', '#C5A059', '#FFFFFF']
+          colors: ['#A8C66C', '#C6A45A', '#F1EBDD']
         });
-      }, 500);
+      }, 400);
     }
   }, [results, playReveal, playVictory]);
 
   const sortedScores = results.roundScores;
   const isMatchOver = results.isMatchOver;
   const winner = results.matchWinner || sortedScores[0];
+  const isWinnerExact = winner?.isExact;
 
   return (
-    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8 z-10 animate-in fade-in zoom-in-95 duration-300">
-      {/* Header Banner */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#131722] border border-[#C5A059]/40 text-[#D4AF37] text-xs font-mono font-medium mb-3">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>ROUND {results.roundNumber} OF {results.totalRounds} RESULTS</span>
-        </div>
-
-        <h1 className="font-display font-black text-3xl sm:text-5xl text-[#FAF8F5] tracking-wide">
-          {isMatchOver ? 'ARENA CHAMPION CROWNED' : 'THE REVEAL IS COMPLETE'}
+    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-5xl mx-auto px-4 sm:px-6 py-6 z-10 space-y-6">
+      {/* Top Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-[#293130]">
+        <h1 className="font-display font-bold text-lg sm:text-xl text-[#F1EBDD] tracking-wide">
+          RESULTS
         </h1>
 
-        {isMatchOver && winner && (
-          <p className="text-sm font-sans text-[#D4AF37] mt-2 flex items-center justify-center gap-1.5 font-bold">
-            <Trophy className="w-4 h-4 text-[#D4AF37]" />
-            <span>Winner: {winner.nickname} with {winner.cumulativeScore} total points!</span>
-          </p>
-        )}
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-mono text-[#A8ADA7]">
+            ROUND {results.roundNumber} / {results.totalRounds}
+          </span>
+          <button
+            title="Options"
+            className="p-1.5 rounded-lg bg-[#101719] border border-[#293130] text-[#A8ADA7]"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Cinematic Reveal Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        {sortedScores.map((score, index) => {
-          const isMe = score.playerId === myPlayerId;
-          return (
-            <div
-              key={score.playerId}
-              className={`relative p-5 rounded-3xl border transition-all ${
-                score.isExact
-                  ? 'bg-[#181E2C] border-[#D4AF37] shadow-2xl shadow-[#D4AF37]/20 ring-1 ring-[#D4AF37]/50'
-                  : isMe
-                  ? 'bg-[#131722] border-[#D4AF37]/60 shadow-xl shadow-[#D4AF37]/10'
-                  : 'bg-[#0D1017] border-[#C5A059]/20'
-              }`}
-            >
-              {/* Rank Badge */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-mono font-black text-xs ${
-                    index === 0
-                      ? 'bg-[#D4AF37] text-black shadow-md'
-                      : index === 1
-                      ? 'bg-[#C5A059] text-black'
-                      : index === 2
-                      ? 'bg-[#8C6D34] text-white'
-                      : 'bg-[#181E2C] text-[#8F8B83] border border-[#C5A059]/20'
-                  }`}>
-                    #{index + 1}
-                  </div>
-                  <span
-                    onClick={() => onInspectPlayer?.(score.playerId)}
-                    className="font-display font-bold text-sm text-[#FAF8F5] max-w-[120px] truncate cursor-pointer hover:text-[#D4AF37] transition-colors"
-                    title="Click to view player dossier"
-                  >
-                    {score.nickname}
-                  </span>
-                  {isMe && <span className="text-[9px] font-mono px-1 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40">YOU</span>}
-                </div>
+      {/* Main 2-Column Split: Winner Card (Left) vs Standings Table (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        {/* Left: WINNER Card (4 cols) */}
+        {winner && (
+          <div className="lg:col-span-4 p-6 rounded-2xl bg-[#101719] border border-[#293130] flex flex-col items-center justify-center text-center space-y-4">
+            <span className="text-xs font-mono font-bold tracking-widest text-[#A8C66C] uppercase">
+              WINNER
+            </span>
 
-                {score.isExact && (
-                  <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-[#D4AF37] bg-[#181E2C] px-2.5 py-0.5 rounded-full border border-[#D4AF37]/50">
-                    <Award className="w-3 h-3" /> EXACT MATCH
-                  </span>
-                )}
-              </div>
+            <Trophy className="w-7 h-7 text-[#C6A45A]" />
 
-              {/* Reveal Comparison Box */}
-              <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-[#07080B] border border-[#C5A059]/20 text-center mb-4">
-                <div>
-                  <div className="text-[10px] font-mono text-[#8F8B83] uppercase">Secret Number</div>
-                  <div className="font-display font-black text-3xl text-[#D4AF37] mt-0.5">
-                    {score.secretNumber}
-                  </div>
-                </div>
+            {/* Winner Avatar */}
+            <div className="w-20 h-20 rounded-full bg-[#151D1D] ring-2 ring-[#C6A45A]/70 flex items-center justify-center font-display font-bold text-2xl text-[#F1EBDD] shadow-lg shadow-black/60">
+              {winner.nickname.charAt(0).toUpperCase()}
+            </div>
 
-                <div className="border-l border-[#C5A059]/15">
-                  <div className="text-[10px] font-mono text-[#8F8B83] uppercase">Submitted Guess</div>
-                  <div className={`font-display font-black text-3xl mt-0.5 ${
-                    score.submittedGuess === null
-                      ? 'text-[#5A564F]'
-                      : score.isExact
-                      ? 'text-emerald-400'
-                      : 'text-[#FAF8F5]'
-                  }`}>
-                    {score.submittedGuess ?? '--'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Metrics */}
-              <div className="space-y-1.5 text-xs font-mono">
-                <div className="flex justify-between text-[#8F8B83]">
-                  <span>Difference:</span>
-                  <span className="text-[#FAF8F5] font-bold">
-                    {score.difference !== null ? `±${score.difference}` : 'No Guess'}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-[#8F8B83]">
-                  <span>Accuracy:</span>
-                  <span className="text-[#D4AF37] font-bold">{score.accuracy}%</span>
-                </div>
-
-                <div className="flex justify-between text-[#8F8B83] pt-1.5 border-t border-[#C5A059]/15">
-                  <span>Round Points:</span>
-                  <span className="text-emerald-400 font-bold">+{score.roundPoints} pts</span>
-                </div>
-
-                {score.isFirstExact && (
-                  <div className="text-[10px] text-[#D4AF37] font-semibold flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Includes +10 First Exact Bonus!
-                  </div>
-                )}
-
-                <div className="flex justify-between text-[#FAF8F5] pt-1 border-t border-[#C5A059]/15 font-bold">
-                  <span>Total Match Score:</span>
-                  <span className="text-[#D4AF37]">{score.cumulativeScore} pts</span>
-                </div>
+            <div className="space-y-1">
+              <span className="font-display font-bold text-lg text-[#F1EBDD] block">
+                {winner.nickname}
+              </span>
+              <div className="font-mono font-bold text-2xl text-[#C6A45A]">
+                {winner.roundScore} <span className="text-sm uppercase font-normal text-[#A8ADA7]">POINTS</span>
               </div>
             </div>
-          );
-        })}
+
+            {isWinnerExact && (
+              <span className="px-3 py-1 rounded-full bg-[#A8C66C]/15 border border-[#A8C66C]/40 text-[#A8C66C] text-[11px] font-mono font-bold">
+                Perfect Guess!
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Right: Standings Table (8 cols) */}
+        <div className="lg:col-span-8 p-5 rounded-2xl bg-[#101719] border border-[#293130] flex flex-col justify-between">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <thead>
+                <tr className="border-b border-[#293130] text-[10px] text-[#A8ADA7] uppercase tracking-wider">
+                  <th className="pb-3 font-semibold">PLAYER</th>
+                  <th className="pb-3 text-center font-semibold">ACTUAL NUMBER</th>
+                  <th className="pb-3 text-center font-semibold">YOUR GUESS</th>
+                  <th className="pb-3 text-center font-semibold">DIFFERENCE</th>
+                  <th className="pb-3 text-right font-semibold">POINTS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#293130]/40">
+                {sortedScores.map((score) => {
+                  const isMe = score.playerId === myPlayerId;
+
+                  return (
+                    <tr
+                      key={score.playerId}
+                      onClick={() => onInspectPlayer?.(score.playerId)}
+                      className={`hover:bg-[#151D1D]/50 transition-colors cursor-pointer ${
+                        isMe ? 'bg-[#151D1D]/80 font-bold' : ''
+                      }`}
+                    >
+                      {/* Player Info */}
+                      <td className="py-3.5 pr-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-[#151D1D] border border-[#293130] flex items-center justify-center font-bold text-xs text-[#F1EBDD]">
+                            {score.nickname.charAt(0).toUpperCase()}
+                          </div>
+                          <span className={`truncate max-w-[110px] sm:max-w-[140px] ${isMe ? 'text-[#A8C66C]' : 'text-[#F1EBDD]'}`}>
+                            {score.nickname} {isMe && '(You)'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Actual Number */}
+                      <td className="py-3.5 text-center text-[#F1EBDD] font-bold">
+                        {score.actualNumber}
+                      </td>
+
+                      {/* Your Guess */}
+                      <td className="py-3.5 text-center text-[#A8ADA7]">
+                        {score.guess !== null ? score.guess : '—'}
+                      </td>
+
+                      {/* Difference */}
+                      <td className="py-3.5 text-center text-[#A8ADA7]">
+                        {score.difference !== null ? score.difference : '—'}
+                      </td>
+
+                      {/* Points */}
+                      <td className="py-3.5 text-right font-bold text-[#F1EBDD]">
+                        {score.roundScore}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 pt-5 mt-4 border-t border-[#293130]">
+            <button
+              onClick={() => {
+                playClick();
+                if (isMatchOver) {
+                  onRematch();
+                } else {
+                  onNextRound();
+                }
+              }}
+              className="w-full sm:flex-1 py-3 rounded-xl bg-[#A8C66C] hover:bg-[#B8D47C] text-[#070B0D] font-display font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-98"
+            >
+              {isMatchOver ? 'PLAY AGAIN' : 'NEXT ROUND'}
+            </button>
+
+            <button
+              onClick={() => {
+                playClick();
+                onReturnToLobby();
+              }}
+              className="w-full sm:flex-1 py-3 rounded-xl bg-[#151D1D] hover:bg-[#1E2728] border border-[#293130] text-[#F1EBDD] font-display font-semibold text-xs uppercase tracking-wider transition-all active:scale-98"
+            >
+              BACK TO LOBBY
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Host / Player Control Actions */}
-      <div className="bg-[#0D1017]/95 border border-[#C5A059]/30 rounded-3xl p-5 sm:p-6 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl">
-        <div className="text-xs font-mono text-[#8F8B83]">
-          {isHost
-            ? isMatchOver
-              ? 'Match is complete! Host may initiate a rematch or return to lobby.'
-              : `Round ${results.roundNumber} complete. Host can proceed to round ${results.roundNumber + 1}.`
-            : 'Waiting for host to proceed to next round...'}
+      {/* Bottom Navigation Bar */}
+      <div className="pt-6 border-t border-[#293130] flex items-center justify-around text-xs font-mono text-[#A8ADA7]">
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <HelpCircle className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Questions</span>
         </div>
-
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {isHost && (
-            <>
-              <button
-                onClick={() => {
-                  playClick();
-                  onReturnToLobby();
-                }}
-                className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/30 text-xs font-mono text-[#A7A29A] hover:text-[#FAF8F5] transition-all"
-              >
-                <Home className="w-4 h-4" />
-                <span>Return to Lobby</span>
-              </button>
-
-              {isMatchOver ? (
-                <button
-                  onClick={() => {
-                    playClick();
-                    onRematch();
-                  }}
-                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-display font-black text-sm shadow-xl shadow-[#D4AF37]/25 border border-[#F3E5AB]/40 transition-all"
-                >
-                  <RotateCcw className="w-4 h-4 text-black" />
-                  <span>START REMATCH</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    playClick();
-                    onNextRound();
-                  }}
-                  className="flex items-center justify-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-display font-black text-sm shadow-xl shadow-[#D4AF37]/25 border border-[#F3E5AB]/40 transition-all"
-                >
-                  <span>NEXT ROUND ({results.roundNumber + 1}/{results.totalRounds})</span>
-                  <ArrowRight className="w-4 h-4 text-black" />
-                </button>
-              )}
-            </>
-          )}
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <Target className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Guess</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <Trophy className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Rankings</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-[#A8C66C] cursor-pointer">
+          <Award className="w-4 h-4" />
+          <span className="text-[10px] uppercase font-bold tracking-wider">Results</span>
         </div>
       </div>
     </div>

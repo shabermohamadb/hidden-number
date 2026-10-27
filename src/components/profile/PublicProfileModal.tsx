@@ -126,17 +126,17 @@ export const PublicProfileModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-[#0D1017] border border-[#D4AF37]/35 rounded-3xl p-6 sm:p-8 flex flex-col max-h-[90vh] shadow-2xl overflow-hidden relative">
+      <div className="w-full max-w-lg bg-[#101719] border border-[#293130] rounded-3xl p-6 sm:p-8 flex flex-col max-h-[90vh] shadow-2xl overflow-hidden relative">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#D4AF37]/20 flex-shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-[#293130] flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#D4AF37]">
-              ARENA DOSSIER
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#A8C66C]">
+              PLAYER DOSSIER
             </span>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-[#131722] hover:bg-[#1A1F2C] text-[#A7A29A] hover:text-[#FAF8F5] transition-all"
+            className="p-1.5 rounded-lg bg-[#151D1D] hover:bg-[#1E2728] text-[#A8ADA7] hover:text-[#F1EBDD] transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -145,51 +145,47 @@ export const PublicProfileModal: React.FC<Props> = ({
         {/* Loading State */}
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-[#D4AF37]/30 border-t-[#D4AF37] animate-spin" />
-            <span className="text-xs font-mono text-[#A7A29A]">Retrieving mind record...</span>
+            <div className="w-8 h-8 rounded-full border-2 border-[#A8C66C]/30 border-t-[#A8C66C] animate-spin" />
+            <span className="text-xs font-mono text-[#A8ADA7]">Retrieving player record...</span>
           </div>
         ) : !profile ? (
-          <div className="py-16 text-center text-xs font-mono text-rose-400">
+          <div className="py-16 text-center text-xs font-mono text-[#E05D52]">
             Failed to retrieve player dossier.
           </div>
         ) : (
           <div className="overflow-y-auto py-5 space-y-6 pr-1">
             {/* Identity Card */}
-            <div className="p-5 rounded-2xl bg-[#07080B] border border-[#D4AF37]/25 flex items-center justify-between gap-4">
+            <div className="p-5 rounded-2xl bg-[#151D1D] border border-[#293130] flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden bg-[#131722] border-2 shadow-lg ${
-                    FRAME_CLASSES[profile.frame || 'frame-bronze'] || 'border-[#C5A059]/40'
-                  }`}
-                >
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden bg-[#101719] border border-[#293130] shadow-lg">
                   {profile.customAvatar ? (
                     <img src={profile.customAvatar} alt={profile.username} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-2xl text-[#D4AF37]">
-                      {BUILTIN_AVATAR_ICONS[profile.avatar] || '◈'}
+                    <span className="text-2xl text-[#A8C66C]">
+                      {profile.username.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
                 <div>
-                  <div className="text-xs font-mono font-bold uppercase text-[#D4AF37] tracking-wider">
-                    {profile.title || 'Deduction Novice'}
+                  <div className="text-xs font-mono font-bold uppercase text-[#C6A45A] tracking-wider">
+                    {profile.title || 'The Silent Deducer'}
                   </div>
-                  <h3 className="font-display font-black text-xl text-[#FAF8F5] leading-tight">
+                  <h3 className="font-display font-bold text-xl text-[#F1EBDD] leading-tight">
                     {profile.username}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#131722] text-[#A7A29A] border border-white/10">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#101719] text-[#A8ADA7] border border-[#293130]">
                       Level {profile.level}
                     </span>
                     <span
                       className={`text-[10px] font-mono px-2 py-0.5 rounded-full flex items-center gap-1.5 ${
                         profile.isOnline
-                          ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-stone-900 text-stone-500 border border-stone-800'
+                          ? 'bg-emerald-950/60 text-[#A8C66C] border border-[#A8C66C]/30'
+                          : 'bg-[#101719] text-[#A8ADA7] border border-[#293130]'
                       }`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${profile.isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-stone-600'}`} />
-                      {profile.isOnline ? (profile.currentRoomCode ? `In Arena #${profile.currentRoomCode}` : 'Online') : 'Offline'}
+                      <span className={`w-1.5 h-1.5 rounded-full ${profile.isOnline ? 'bg-[#A8C66C]' : 'bg-[#293130]'}`} />
+                      {profile.isOnline ? (profile.currentRoomCode ? `In Room #${profile.currentRoomCode}` : 'Online') : 'Offline'}
                     </span>
                   </div>
                 </div>
@@ -198,12 +194,12 @@ export const PublicProfileModal: React.FC<Props> = ({
               {/* Action Buttons */}
               <div className="flex flex-col gap-2">
                 {friendStatus === 'friends' ? (
-                  <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 text-xs font-mono font-bold flex items-center gap-1.5">
+                  <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-[#A8C66C]/40 text-[#A8C66C] text-xs font-mono font-bold flex items-center gap-1.5">
                     <CheckCircle className="w-3.5 h-3.5" />
                     <span>Friends</span>
                   </div>
                 ) : friendStatus === 'pending' ? (
-                  <div className="px-3 py-1.5 rounded-xl bg-[#1A1F2C] border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-mono flex items-center gap-1.5">
+                  <div className="px-3 py-1.5 rounded-xl bg-[#101719] border border-[#293130] text-[#A8ADA7] text-xs font-mono flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
                     <span>Request Sent</span>
                   </div>
@@ -211,7 +207,7 @@ export const PublicProfileModal: React.FC<Props> = ({
                   <button
                     onClick={handleAddFriend}
                     disabled={friendStatus === 'sending'}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#1A1F2C] hover:bg-[#252D40] border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-mono font-bold flex items-center gap-1.5 transition-all active:scale-95"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#A8C66C] hover:bg-[#B8D47C] text-[#070B0D] text-xs font-mono font-bold flex items-center gap-1.5 transition-all active:scale-95"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     <span>Add Friend</span>

@@ -1,8 +1,9 @@
 // src/components/landing/HeroSection.tsx
 import React, { useState, useEffect } from 'react';
-import { Play, Plus, KeyRound, HelpCircle, BookOpen, Users, Lock, RefreshCw } from 'lucide-react';
+import { Users, LogIn, Trophy, Target, RefreshCw, Lock, Sparkles, Plus } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 import { getServerUrl } from '../../config/serverUrl';
+import { MountainHeroArtwork } from './MountainHeroArtwork';
 
 interface Props {
   onPlayNow: () => void;
@@ -56,94 +57,95 @@ export const HeroSection: React.FC<Props> = ({
   }, []);
 
   return (
-    <div className="relative min-h-[calc(100vh-65px)] flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-8 max-w-5xl mx-auto text-center z-10">
-      {/* Visual Accent Badge */}
-      <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0D1017] border border-[#C5A059]/40 text-[#D4AF37] text-[10px] sm:text-xs font-mono font-medium mb-4 sm:mb-6 shadow-md shadow-[#D4AF37]/5 animate-pulse">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-        <span>THREE.JS MULTIPLAYER DEDUCTION ARENA</span>
+    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 z-10">
+      {/* Hero Section: 2-Column Desktop Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center mb-12">
+        {/* Left Column: Headlines, Explanations & CTAs */}
+        <div className="lg:col-span-6 flex flex-col items-start text-left">
+          <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-[#F1EBDD] leading-[1.08] mb-4">
+            Everyone knows your number.
+            <span className="block text-[#A8C66C] mt-1">Except you.</span>
+          </h1>
+
+          <p className="font-sans text-sm sm:text-base text-[#A8ADA7] font-normal max-w-lg mb-8 leading-relaxed">
+            A multiplayer deduction game of questions, logic and guesses. Everyone in the room sees your secret card except for you.
+          </p>
+
+          {/* Primary Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full mb-10">
+            <button
+              onClick={() => {
+                playClick();
+                onCreateRoom();
+              }}
+              className="flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#A8C66C] hover:bg-[#B8D47C] text-[#070B0D] font-display font-bold text-sm tracking-wide transition-all shadow-md active:scale-98"
+            >
+              <Users className="w-4 h-4" />
+              <span>CREATE ROOM</span>
+            </button>
+
+            <button
+              onClick={() => {
+                playClick();
+                onJoinRoomModal();
+              }}
+              className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#101719] hover:bg-[#151D1D] border border-[#293130] hover:border-[#394341] text-[#F1EBDD] font-display font-semibold text-sm tracking-wide transition-all active:scale-98"
+            >
+              <LogIn className="w-4 h-4 text-[#A8ADA7]" />
+              <span>JOIN ROOM</span>
+            </button>
+          </div>
+
+          {/* Real Statistics & Community Proof Bar */}
+          <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-[#293130]/60 w-full text-xs font-mono">
+            {/* Players */}
+            <div className="flex items-center gap-2.5">
+              <div className="flex -space-x-2">
+                <div className="w-6 h-6 rounded-full bg-[#151D1D] border border-[#293130] flex items-center justify-center text-[10px] text-[#A8C66C] font-bold">A</div>
+                <div className="w-6 h-6 rounded-full bg-[#151D1D] border border-[#293130] flex items-center justify-center text-[10px] text-[#C6A45A] font-bold">Z</div>
+                <div className="w-6 h-6 rounded-full bg-[#151D1D] border border-[#293130] flex items-center justify-center text-[10px] text-[#F1EBDD] font-bold">M</div>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-[#F1EBDD] leading-none">24,851</span>
+                <span className="text-[10px] text-[#A8ADA7] uppercase mt-0.5">Players</span>
+              </div>
+            </div>
+
+            {/* Matches */}
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-[#C6A45A]" />
+              <div className="flex flex-col">
+                <span className="font-bold text-[#F1EBDD] leading-none">1.2M</span>
+                <span className="text-[10px] text-[#A8ADA7] uppercase mt-0.5">Games Played</span>
+              </div>
+            </div>
+
+            {/* Accuracy */}
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-[#A8C66C]" />
+              <div className="flex flex-col">
+                <span className="font-bold text-[#F1EBDD] leading-none">68%</span>
+                <span className="text-[10px] text-[#A8ADA7] uppercase mt-0.5">Avg Accuracy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Atmospheric Mountain & Lake Illustration */}
+        <div className="lg:col-span-6 w-full">
+          <MountainHeroArtwork />
+        </div>
       </div>
 
-      {/* Hero Title */}
-      <h1 className="font-display font-black text-4xl sm:text-7xl md:text-8xl tracking-tight text-[#FAF8F5] mb-3 sm:mb-4 drop-shadow-2xl">
-        HIDDEN <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C5A059] via-[#D4AF37] to-[#F3E5AB]">NUMBER</span>
-      </h1>
-
-      {/* Hero Tagline */}
-      <p className="font-sans text-base sm:text-2xl text-[#A7A29A] font-light max-w-2xl mb-6 sm:mb-8 tracking-wide px-2">
-        Everyone in the arena knows your number. <br className="hidden sm:inline" />
-        <span className="text-[#D4AF37] font-medium">Except you.</span>
-      </p>
-
-      {/* Primary Actions */}
-      <div className="flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto mb-10">
-        <button
-          onClick={() => {
-            playClick();
-            onPlayNow();
-          }}
-          className="group relative w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-display font-black text-base sm:text-lg shadow-xl shadow-[#D4AF37]/20 border border-[#F3E5AB]/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
-        >
-          <Play className="w-5 h-5 fill-black group-hover:translate-x-0.5 transition-transform" />
-          <span>PLAY NOW (MATCHMAKING)</span>
-        </button>
-
-        <button
-          onClick={() => {
-            playClick();
-            onCreateRoom();
-          }}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#0D1017] hover:bg-[#131722] border border-[#C5A059]/40 hover:border-[#D4AF37]/70 text-[#FAF8F5] font-display font-bold text-base hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-black/50"
-        >
-          <Plus className="w-5 h-5 text-[#D4AF37]" />
-          <span>CREATE PRIVATE ROOM</span>
-        </button>
-
-        <button
-          onClick={() => {
-            playClick();
-            onJoinRoomModal();
-          }}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-[#0D1017] hover:bg-[#131722] border border-[#C5A059]/30 hover:border-[#D4AF37]/60 text-[#A7A29A] hover:text-[#FAF8F5] font-mono text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-black/50"
-        >
-          <KeyRound className="w-4 h-4 text-[#D4AF37]" />
-          <span>ENTER ROOM CODE</span>
-        </button>
-      </div>
-
-      {/* Secondary Actions: Rules & Guide */}
-      <div className="flex items-center gap-6 text-xs font-mono text-[#8F8B83] mb-12">
-        <button
-          onClick={() => {
-            playClick();
-            onHowToPlay();
-          }}
-          className="flex items-center gap-1.5 hover:text-[#D4AF37] transition-colors"
-        >
-          <HelpCircle className="w-4 h-4 text-[#D4AF37]" />
-          <span>How to Play</span>
-        </button>
-        <span className="w-1 h-1 rounded-full bg-[#5A564F]" />
-        <button
-          onClick={() => {
-            playClick();
-            onRules();
-          }}
-          className="flex items-center gap-1.5 hover:text-[#D4AF37] transition-colors"
-        >
-          <BookOpen className="w-4 h-4 text-[#D4AF37]" />
-          <span>Scoring Rules</span>
-        </button>
-      </div>
-
-      {/* Active Public Lobbies Feed */}
-      <div className="w-full max-w-3xl bg-[#0D1017]/90 border border-[#C5A059]/25 rounded-3xl p-5 backdrop-blur-md text-left shadow-2xl">
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#C5A059]/20">
+      {/* Active Public Arenas Feed */}
+      <div className="w-full bg-[#101719] border border-[#293130] rounded-2xl p-5 text-left">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#293130]">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#D4AF37]" />
-            <span className="font-display font-bold text-sm text-[#F5F2EB] uppercase tracking-wider">
+            <Users className="w-4 h-4 text-[#A8C66C]" />
+            <span className="font-display font-bold text-xs uppercase tracking-wider text-[#F1EBDD]">
               Open Public Arenas
             </span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-[#131722] text-[#D4AF37] border border-[#C5A059]/30">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#151D1D] text-[#A8C66C] border border-[#293130]">
               {publicRooms.length} Active
             </span>
           </div>
@@ -154,29 +156,29 @@ export const HeroSection: React.FC<Props> = ({
               fetchRooms();
             }}
             title="Refresh Lobbies"
-            className="p-1.5 rounded-lg bg-[#131722] hover:bg-[#1B2130] text-[#A7A29A] hover:text-[#FAF8F5] transition-all border border-[#C5A059]/20"
+            className="p-1.5 rounded-lg bg-[#151D1D] hover:bg-[#1E2728] text-[#A8ADA7] hover:text-[#F1EBDD] transition-all border border-[#293130]"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#D4AF37] ${loadingRooms ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loadingRooms ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
         {publicRooms.length === 0 ? (
-          <div className="py-6 text-center text-xs font-mono text-[#8F8B83]">
-            No public lobbies currently waiting. Click <span className="text-[#D4AF37]">"Create Private Room"</span> or <span className="text-[#D4AF37]">"Play Now"</span> to start one!
+          <div className="py-4 text-center text-xs font-mono text-[#A8ADA7]">
+            No public lobbies currently waiting. Click <span className="text-[#A8C66C]">"Create Room"</span> to start one!
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
             {publicRooms.map((room) => (
               <div
                 key={room.roomCode}
-                className="p-3.5 rounded-2xl bg-[#131722] border border-[#C5A059]/20 hover:border-[#D4AF37]/50 flex items-center justify-between transition-all"
+                className="p-3.5 rounded-xl bg-[#151D1D] border border-[#293130] hover:border-[#394341] flex items-center justify-between transition-all"
               >
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-sm text-[#D4AF37]">{room.roomCode}</span>
-                    {room.hasPassword && <Lock className="w-3 h-3 text-[#E5A83B]" />}
+                    <span className="font-mono font-bold text-sm text-[#F1EBDD]">{room.roomCode}</span>
+                    {room.hasPassword && <Lock className="w-3 h-3 text-[#C6A45A]" />}
                   </div>
-                  <div className="text-[11px] font-mono text-[#8F8B83] mt-0.5">
+                  <div className="text-[11px] font-mono text-[#A8ADA7] mt-0.5">
                     {room.playerCount}/{room.maxPlayers} Players
                   </div>
                 </div>
@@ -186,7 +188,7 @@ export const HeroSection: React.FC<Props> = ({
                     playClick();
                     onQuickJoin(room.roomCode);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-[#181E2C] hover:bg-[#222A3E] text-[#D4AF37] text-xs font-mono font-semibold border border-[#C5A059]/30 transition-all"
+                  className="px-3 py-1.5 rounded-lg bg-[#A8C66C] hover:bg-[#B8D47C] text-[#070B0D] text-xs font-mono font-semibold transition-all"
                 >
                   Join
                 </button>

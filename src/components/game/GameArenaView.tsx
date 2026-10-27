@@ -1,19 +1,11 @@
 // src/components/game/GameArenaView.tsx
 import React, { useState } from 'react';
-import { GameState, Player } from '../../types/game';
-import { SynchronizedTimer } from './SynchronizedTimer';
+import { GameState } from '../../types/game';
 import { TurnQueueBar } from './TurnQueueBar';
 import { ActiveQuestionPanel } from './ActiveQuestionPanel';
 import { QuestionHistoryFeed } from './QuestionHistoryFeed';
-import { FinalGuessModal } from './FinalGuessModal';
-import {
-  Users,
-  Crown,
-  Eye,
-  HelpCircle,
-  Sparkles,
-  Check
-} from 'lucide-react';
+import { GuessPhaseView } from './GuessPhaseView';
+import { MessageSquare, Target, Trophy, HelpCircle, Menu, Eye } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 interface Props {
@@ -46,204 +38,142 @@ export const GameArenaView: React.FC<Props> = ({
   const currentActiveAsker = otherPlayers.find(p => p.id === gameState.activeQuestion?.askerId);
   const askerSecretNumber = currentActiveAsker ? currentActiveAsker.secretNumber : null;
 
+  // Remaining time calculation
+  const deadline = isGuessingPhase
+    ? gameState.deadlines?.guessDeadline ?? null
+    : gameState.deadlines?.questionDeadline ?? null;
+  const totalDuration = isGuessingPhase
+    ? gameState.settings.guessTime
+    : gameState.settings.questionTime;
+  const remainingSeconds = deadline
+    ? Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+    : gameState.remainingSeconds ?? totalDuration;
+
   return (
-    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-6 z-10 space-y-5">
-      {/* Top Arena Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#131722] text-[#D4AF37] border border-[#C5A059]/30 font-bold">
-              ROUND {gameState.currentRound} OF {gameState.totalRounds}
-            </span>
-            <span className="text-[11px] sm:text-xs font-mono text-[#8F8B83]">
-              {isGuessingPhase ? 'FINAL GUESS PHASE' : 'TURN-BASED INTERROGATION PHASE'}
-            </span>
-          </div>
-          <h1 className="font-display font-black text-xl sm:text-2xl text-[#FAF8F5] tracking-wide">
-            {isGuessingPhase ? 'DEDUCTION LOCK-IN' : 'DIGITAL MIND ARENA'}
+    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-6xl mx-auto px-4 sm:px-6 py-6 z-10 space-y-6">
+      {/* Top Bar: Title, Round Indicator, and Menu Icon */}
+      <div className="flex items-center justify-between pb-3 border-b border-[#293130]">
+        <div className="flex items-center gap-3">
+          <h1 className="font-display font-bold text-lg sm:text-xl text-[#F1EBDD] tracking-wide">
+            {isGuessingPhase ? 'GUESS PHASE' : 'GAME'}
           </h1>
         </div>
 
-        {/* Synchronized Server Timer */}
-        <SynchronizedTimer
-          deadline={
-            isGuessingPhase
-              ? gameState.deadlines?.guessDeadline ?? null
-              : gameState.deadlines?.questionDeadline ?? null
-          }
-          totalDuration={
-            isGuessingPhase
-              ? gameState.settings.guessTime
-              : gameState.settings.questionTime
-          }
-          phaseName={isGuessingPhase ? 'Guess Deadline' : 'Interrogation Window'}
-        />
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-mono text-[#A8ADA7]">
+            ROUND {gameState.currentRound} / {gameState.totalRounds}
+          </span>
+          <button
+            title="Options"
+            className="p-1.5 rounded-lg bg-[#101719] border border-[#293130] text-[#A8ADA7] hover:text-[#F1EBDD] transition-colors"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Concealed Mystery Number Card (Self) */}
-      {me && (
-        <div className="p-4 sm:p-5 rounded-3xl bg-[#0D1017] border-2 border-[#D4AF37]/50 shadow-2xl shadow-black/80">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-center md:text-left">
-              <div
-                onClick={() => onInspectPlayer?.(me.id)}
-                className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-display font-black text-black text-xl shadow-md shrink-0 cursor-pointer hover:scale-105 transition-transform"
-                title="Click to view dossier"
-              >
-                {me.nickname.charAt(0).toUpperCase()}
+      {/* Main Interactive Body */}
+      {isGuessingPhase ? (
+        /* SCREEN 4: GUESS PHASE */
+        <GuessPhaseView
+          roundNumber={gameState.currentRound}
+          totalRounds={gameState.totalRounds}
+          remainingSeconds={remainingSeconds}
+          onSubmitGuess={onSubmitGuess}
+          isSubmitting={isSubmittingGuess}
+          hasSubmitted={Boolean(me?.hasSubmittedGuess)}
+          submittedGuess={me?.guess ?? null}
+        />
+      ) : (
+        /* SCREEN 3: QUESTION PHASE */
+        <div className="space-y-6">
+          {/* Turn Order Sequence Bar with Circular Timer */}
+          <TurnQueueBar
+            turnOrder={gameState.turnState?.turnOrder || []}
+            currentAskerId={gameState.turnState?.currentAskerId || null}
+            myPlayerId={me?.id || myPlayerId}
+            onInspectPlayer={onInspectPlayer}
+            remainingSeconds={remainingSeconds}
+            totalDuration={totalDuration}
+          />
+
+          {/* Golden Rule Mystery Card & Opponents Numbers Bar */}
+          <div className="p-4 rounded-2xl bg-[#101719] border border-[#293130] flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Self Mystery Card */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#151D1D] border border-[#293130] flex items-center justify-center font-mono font-bold text-lg text-[#C6A45A]">
+                ?
               </div>
               <div>
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <span className="font-display font-black text-lg text-[#FAF8F5]">
-                    {me.nickname}
-                  </span>
-                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 font-bold">
-                    YOU
-                  </span>
-                </div>
-                <p className="text-xs text-[#8F8B83] mt-0.5">
-                  Your number is concealed. Ask deduction questions on your turn to figure it out.
-                </p>
+                <span className="text-xs font-mono font-semibold text-[#F1EBDD] block">
+                  {me?.nickname || 'Your Number'}
+                </span>
+                <span className="text-[10px] font-mono text-[#A8ADA7]">
+                  Concealed from you (Others see your number)
+                </span>
               </div>
             </div>
 
-            {/* Concealed Number Box */}
-            <div className="flex items-center gap-3">
-              <div className="relative px-6 py-2 rounded-2xl bg-[#07080B] border-2 border-dashed border-[#D4AF37]/60 flex items-center gap-3 shadow-inner">
-                <span className="text-[#D4AF37] font-display font-black text-3xl animate-bounce">
-                  ?
-                </span>
-                <div className="text-left font-mono">
-                  <div className="text-[10px] text-[#D4AF37] uppercase font-bold tracking-wider">
-                    CONCEALED NUMBER
-                  </div>
-                  <div className="text-[10px] text-[#8F8B83]">
-                    Hidden to you • Visible to opponents
-                  </div>
+            {/* Other Players Visible Numbers (Golden Rule in action) */}
+            <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+              <span className="text-[10px] font-mono text-[#A8ADA7] uppercase mr-1">Other Numbers:</span>
+              {otherPlayers.map(p => (
+                <div
+                  key={p.id}
+                  onClick={() => onInspectPlayer?.(p.id)}
+                  className="px-2.5 py-1 rounded-lg bg-[#151D1D] border border-[#293130] text-xs font-mono flex items-center gap-1.5 cursor-pointer hover:border-[#394341]"
+                >
+                  <span className="text-[#A8ADA7] max-w-[70px] truncate">{p.nickname}:</span>
+                  <span className="font-bold text-[#A8C66C]">{p.secretNumber ?? '?'}</span>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              <div className="hidden sm:block text-right font-mono text-xs">
-                <div className="text-[#8F8B83]">Career Score</div>
-                <div className="text-base font-bold text-[#FAF8F5]">{me.cumulativeScore} pts</div>
-              </div>
+          {/* Center 2-Column Interrogation Arena */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Active Question Deduction Panel (7 cols) */}
+            <div className="lg:col-span-7">
+              <ActiveQuestionPanel
+                activeQuestion={gameState.activeQuestion || null}
+                turnState={gameState.turnState}
+                myPlayerId={me?.id || myPlayerId}
+                askerSecretNumber={askerSecretNumber}
+                onAskQuestion={(content) => onAskQuestion(content)}
+                onSubmitAnswer={(qId, ans) => onSubmitAnswer(qId, ans)}
+              />
+            </div>
+
+            {/* Right-Hand Question History Sidebar (5 cols) */}
+            <div className="lg:col-span-5 h-full">
+              <QuestionHistoryFeed
+                questionHistory={gameState.questionHistory || []}
+                myPlayerId={me?.id || myPlayerId}
+              />
             </div>
           </div>
         </div>
       )}
 
-      {/* Opponents' Visible Numbers Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#D4AF37]" />
-            <h2 className="font-display font-bold text-xs sm:text-sm text-[#FAF8F5] uppercase tracking-wider">
-              Opponents&apos; Assigned Numbers (Known to You)
-            </h2>
-          </div>
-          <span className="text-xs font-mono text-[#D4AF37]">
-            Inspect their numbers to answer their inquiries accurately
-          </span>
+      {/* Bottom Navigation Bar */}
+      <div className="pt-6 border-t border-[#293130] flex items-center justify-around text-xs font-mono text-[#A8ADA7]">
+        <div className={`flex flex-col items-center gap-1 cursor-pointer ${!isGuessingPhase ? 'text-[#A8C66C]' : 'hover:text-[#F1EBDD]'}`}>
+          <HelpCircle className="w-4 h-4" />
+          <span className="text-[10px] uppercase font-bold tracking-wider">Questions</span>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {otherPlayers.map((player) => (
-            <div
-              key={player.id}
-              className={`p-3.5 rounded-2xl bg-[#0D1017] border transition-all ${
-                gameState.activeQuestion?.askerId === player.id
-                  ? 'border-[#D4AF37] shadow-lg shadow-[#D4AF37]/15 ring-1 ring-[#D4AF37]/40'
-                  : 'border-[#C5A059]/20'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    onClick={() => onInspectPlayer?.(player.id)}
-                    className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-display font-black text-black text-xs shadow shrink-0 cursor-pointer hover:scale-105 transition-transform"
-                    title="Click to view dossier"
-                  >
-                    {player.nickname.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        onClick={() => onInspectPlayer?.(player.id)}
-                        className="font-display font-bold text-xs text-[#FAF8F5] hover:text-[#D4AF37] transition-colors cursor-pointer"
-                        title="Click to view dossier"
-                      >
-                        {player.nickname}
-                      </span>
-                      {player.isHost && <Crown className="w-3 h-3 text-[#D4AF37]" />}
-                    </div>
-                    <span className="text-[10px] font-mono text-[#8F8B83]">
-                      Score: {player.cumulativeScore} pts
-                    </span>
-                  </div>
-                </div>
-
-                {player.hasGuessed ? (
-                  <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/40 flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Guessed
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono text-[#8F8B83] bg-[#131722] px-2 py-0.5 rounded-full border border-[#C5A059]/20">
-                    Thinking
-                  </span>
-                )}
-              </div>
-
-              {/* Big Prominent Number Card */}
-              <div className="p-2.5 rounded-xl bg-[#131722] border border-[#C5A059]/30 flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase text-[#A7A29A]">
-                  Their Number:
-                </span>
-                <span className="text-2xl font-display font-black text-[#D4AF37]">
-                  {player.secretNumber !== null ? player.secretNumber : '--'}
-                </span>
-              </div>
-            </div>
-          ))}
+        <div className={`flex flex-col items-center gap-1 cursor-pointer ${isGuessingPhase ? 'text-[#A8C66C]' : 'hover:text-[#F1EBDD]'}`}>
+          <Target className="w-4 h-4" />
+          <span className="text-[10px] uppercase font-bold tracking-wider">Guess</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <Trophy className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Rankings</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <MessageSquare className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Chat</span>
         </div>
       </div>
-
-      {/* Turn Queue Ribbon */}
-      {gameState.turnState && (
-        <TurnQueueBar
-          turnOrder={gameState.turnState.turnOrder}
-          currentAskerId={gameState.turnState.currentAskerId}
-          myPlayerId={myPlayerId}
-          onInspectPlayer={onInspectPlayer}
-        />
-      )}
-
-      {/* Centerpiece: ACTIVE QUESTION & TURN COMPOSER */}
-      <ActiveQuestionPanel
-        activeQuestion={gameState.activeQuestion ?? null}
-        turnState={gameState.turnState}
-        myPlayerId={myPlayerId}
-        askerSecretNumber={askerSecretNumber}
-        onAskQuestion={(content) => onAskQuestion(content)}
-        onSubmitAnswer={(qId, ans) => onSubmitAnswer(qId, ans)}
-        disabled={isGuessingPhase}
-      />
-
-      {/* Question History Feed */}
-      <QuestionHistoryFeed
-        questionHistory={gameState.questionHistory || []}
-        myPlayerId={myPlayerId}
-      />
-
-      {/* Final Guessing Modal Overlay when Phase triggers */}
-      {isGuessingPhase && (
-        <FinalGuessModal
-          remainingSeconds={gameState.remainingSeconds}
-          onSubmit={onSubmitGuess}
-          isSubmitting={isSubmittingGuess}
-          hasSubmitted={gameState.mySubmittedGuess !== null}
-          submittedGuess={gameState.mySubmittedGuess}
-        />
-      )}
     </div>
   );
 };

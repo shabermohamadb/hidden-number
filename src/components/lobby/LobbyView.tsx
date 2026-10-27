@@ -1,6 +1,6 @@
 // src/components/lobby/LobbyView.tsx
 import React, { useState } from 'react';
-import { Play, Copy, Check, LogOut, Crown, Shield, Users, Clock, AlertCircle, KeyRound, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, Lock, Settings, Copy, Check, Link as LinkIcon, Crown, Shield, Users, Home, BookOpen, User } from 'lucide-react';
 import { GameState } from '../../types/game';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
@@ -27,11 +27,12 @@ export const LobbyView: React.FC<Props> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
 
-  // Reliable player resolution: matches ID or persisted nickname
+  // Reliable player resolution
   const myNickname = localStorage.getItem('hn_nickname');
   const me = gameState.players.find(p => p.id === myPlayerId || (myNickname && p.nickname === myNickname));
   const isHost = me?.isHost || myPlayerId === gameState.hostId;
   const connectedPlayers = gameState.players.filter(p => p.connected);
+  const maxPlayers = gameState.settings.maxPlayers || 6;
   const minPlayers = gameState.settings.minPlayers || 2;
   const readyCount = connectedPlayers.filter(p => p.isReady || p.isHost).length;
   const waitingCount = connectedPlayers.filter(p => !p.isReady && !p.isHost).length;
@@ -59,233 +60,252 @@ export const LobbyView: React.FC<Props> = ({
     onReadyToggle(nextReady);
   };
 
+  // Generate empty slot placeholders up to maxPlayers
+  const emptySlotsCount = Math.max(0, maxPlayers - connectedPlayers.length);
+  const emptySlots = Array.from({ length: emptySlotsCount });
+
   return (
-    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8 z-10">
-      {/* Header Info */}
-      <div className="bg-[#0D1017]/90 border border-[#C5A059]/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-xl shadow-2xl mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] sm:text-xs font-mono uppercase px-2.5 py-0.5 rounded-full bg-[#131722] text-[#D4AF37] border border-[#C5A059]/30">
-                LOBBY STAGING
-              </span>
-              <span className="text-[10px] sm:text-xs font-mono text-[#8F8B83]">
-                {gameState.settings.visibility === 'public' ? 'Public Arena' : 'Private Arena'}
-              </span>
+    <div className="relative min-h-[calc(100vh-65px)] flex flex-col justify-between max-w-4xl mx-auto px-4 sm:px-6 py-6 z-10">
+      <div className="space-y-6">
+        {/* Top Navigation Bar: Back button, Title, Status & Settings */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => {
+              playClick();
+              onLeaveRoom();
+            }}
+            className="flex items-center gap-2 text-sm font-display font-semibold text-[#F1EBDD] hover:text-[#A8C66C] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>LOBBY</span>
+          </button>
+
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#101719] border border-[#293130] text-[11px] font-mono text-[#A8ADA7]">
+              <Lock className="w-3 h-3 text-[#C6A45A]" />
+              <span className="uppercase">{gameState.settings.visibility === 'public' ? 'Public Room' : 'Private Room'}</span>
             </div>
-            <h1 className="font-display font-black text-xl sm:text-3xl text-[#FAF8F5] tracking-wide flex items-center gap-2 sm:gap-3">
-              <span>ARENA ROOM:</span>
-              <span className="text-[#D4AF37] font-mono tracking-wider">
+
+            <div className="p-1.5 rounded-lg bg-[#101719] border border-[#293130] text-[#A8ADA7]">
+              <Settings className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+
+        {/* Room Code & Invite Link Dual Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* Room Code Card */}
+          <div className="p-4 rounded-2xl bg-[#101719] border border-[#293130] flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#A8ADA7] block mb-1">
+                ROOM CODE
+              </span>
+              <span className="font-mono font-bold text-xl sm:text-2xl tracking-wider text-[#F1EBDD]">
                 {gameState.roomCode}
               </span>
-            </h1>
-          </div>
-
-          {/* Action Buttons: Separate Copy Link & Copy Code */}
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={handleCopyInviteLink}
-              title="Copy direct invite link to share with friends"
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/30 text-xs font-mono text-[#D4AF37] transition-all active:scale-95"
-            >
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <LinkIcon className="w-4 h-4" />}
-              <span>{copiedLink ? '✓ Link Copied!' : 'Copy Invite Link'}</span>
-            </button>
-
+            </div>
             <button
               onClick={handleCopyRoomCode}
-              title="Copy room code only"
-              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/30 text-xs font-mono text-[#F3E5AB] transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#151D1D] hover:bg-[#1E2728] border border-[#293130] text-xs font-mono text-[#F1EBDD] hover:text-[#A8C66C] transition-all"
             >
-              {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-              <span>{copiedCode ? '✓ Copied' : 'Copy Code'}</span>
+              {copiedCode ? <Check className="w-3.5 h-3.5 text-[#A8C66C]" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedCode ? 'COPIED' : 'COPY'}</span>
             </button>
+          </div>
 
+          {/* Invite Link Card */}
+          <div className="p-4 rounded-2xl bg-[#101719] border border-[#293130] flex items-center justify-between">
+            <div className="truncate mr-3">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#A8ADA7] block mb-1">
+                INVITE LINK
+              </span>
+              <span className="font-mono text-xs text-[#A8ADA7] truncate block max-w-[200px] sm:max-w-[220px]">
+                {`${window.location.host}?room=${gameState.roomCode}`}
+              </span>
+            </div>
             <button
-              onClick={() => {
-                playClick();
-                onLeaveRoom();
-              }}
-              className="p-2.5 rounded-xl bg-[#131722] hover:bg-rose-950/40 border border-[#C5A059]/20 hover:border-rose-500/40 text-[#8F8B83] hover:text-rose-400 transition-all active:scale-95 shrink-0"
-              title="Leave Room"
+              onClick={handleCopyInviteLink}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#151D1D] hover:bg-[#1E2728] border border-[#293130] text-xs font-mono text-[#F1EBDD] hover:text-[#A8C66C] transition-all shrink-0"
             >
-              <LogOut className="w-4 h-4" />
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-[#A8C66C]" /> : <LinkIcon className="w-3.5 h-3.5" />}
+              <span>{copiedLink ? 'COPIED' : 'COPY LINK'}</span>
             </button>
           </div>
         </div>
 
-        {/* Room settings pill bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-[#C5A059]/20 text-[11px] sm:text-xs font-mono">
-          <div className="flex items-center gap-1.5 text-[#A7A29A]">
-            <Users className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span>Players: {connectedPlayers.length}/{gameState.settings.maxPlayers} (Min {minPlayers})</span>
-          </div>
+        {/* Main Content: Split Players List vs Room Settings */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* Left Column: Player Slots (7 cols) */}
+          <div className="lg:col-span-7 p-5 rounded-2xl bg-[#101719] border border-[#293130] space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#293130]/60">
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#A8ADA7]">
+                PLAYERS ({connectedPlayers.length}/{maxPlayers})
+              </span>
+              <span className="text-[11px] font-mono text-[#A8ADA7]">
+                Min {minPlayers} to start
+              </span>
+            </div>
 
-          <div className="flex items-center gap-1.5 text-[#A7A29A]">
-            <Clock className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span>Questions: {gameState.settings.questionTime}s</span>
-          </div>
+            {/* Connected Player Rows */}
+            <div className="space-y-2">
+              {connectedPlayers.map((player) => {
+                const isMe = player.id === me?.id;
+                const isReady = player.isReady || player.isHost;
 
-          <div className="flex items-center gap-1.5 text-[#A7A29A]">
-            <Shield className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span>Guess: {gameState.settings.guessTime}s</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[#A7A29A]">
-            <Crown className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-            <span>Rounds: {gameState.settings.totalRounds}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Player Slots Grid */}
-      <div className="flex-1 mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-          <h2 className="font-display font-bold text-sm sm:text-base text-[#FAF8F5] uppercase tracking-wider flex items-center gap-2">
-            <span>Roster Members</span>
-            <span className="text-[10px] sm:text-xs font-mono text-[#D4AF37] bg-[#131722] px-2.5 py-0.5 rounded-lg border border-[#C5A059]/30">
-              {readyCount} of {connectedPlayers.length} Ready
-            </span>
-          </h2>
-
-          <div className="flex items-center gap-2">
-            {connectedPlayers.length < minPlayers ? (
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-300 bg-amber-950/40 px-2.5 py-1 rounded-xl border border-amber-500/30">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>Need {minPlayers - connectedPlayers.length} more player(s)</span>
-              </div>
-            ) : waitingCount > 0 ? (
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#A7A29A] bg-[#131722] px-2.5 py-1 rounded-xl border border-[#C5A059]/20">
-                <span>Waiting for {waitingCount} player{waitingCount === 1 ? '' : 's'} to ready up</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-300 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/30">
-                <Check className="w-3.5 h-3.5 shrink-0" />
-                <span>All players ready! Host can start.</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {gameState.players.map((player) => {
-            const isCurrentMe = player.id === myPlayerId || (myNickname && player.nickname === myNickname);
-            return (
-              <div
-                key={player.id}
-                className={`relative p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border transition-all ${
-                  isCurrentMe
-                    ? 'bg-[#181E2C] border-[#D4AF37] shadow-lg shadow-[#D4AF37]/10 ring-1 ring-[#D4AF37]/40'
-                    : 'bg-[#0D1017] border-[#C5A059]/20'
-                }`}
-              >
-                <div className="flex items-center justify-between">
+                return (
                   <div
+                    key={player.id}
                     onClick={() => onInspectPlayer?.(player.id)}
-                    className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
-                    title="Click to view player dossier"
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer ${
+                      isMe
+                        ? 'bg-[#151D1D] border border-[#293130]'
+                        : 'bg-[#101719] hover:bg-[#151D1D]/60 border border-transparent'
+                    }`}
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-display font-black text-black text-base sm:text-lg shadow-md shrink-0">
-                      {player.nickname.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-display font-bold text-sm sm:text-base text-[#FAF8F5] max-w-[110px] sm:max-w-[140px] truncate hover:text-[#D4AF37] transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[#1E2728] border border-[#293130] flex items-center justify-center font-display font-bold text-xs text-[#F1EBDD] shrink-0">
+                        {player.nickname.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-display font-medium text-sm text-[#F1EBDD]">
                           {player.nickname}
                         </span>
-                        {isCurrentMe && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 font-bold">
-                            YOU
+                        {player.isHost && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#C6A45A]/15 border border-[#C6A45A]/40 text-[#C6A45A] text-[10px] font-mono font-bold">
+                            <Crown className="w-2.5 h-2.5" />
+                            <span>HOST</span>
                           </span>
                         )}
-                      </div>
-                      <div className="flex items-center gap-2 text-[11px] font-mono text-[#8F8B83] mt-0.5">
-                        {player.isHost ? (
-                          <span className="flex items-center gap-1 text-[#D4AF37] font-semibold">
-                            <Crown className="w-3 h-3" /> Host
+                        {isMe && (
+                          <span className="text-[10px] font-mono text-[#A8ADA7]">
+                            (You)
                           </span>
-                        ) : (
-                          <span>Player</span>
-                        )}
-                        {!player.connected && (
-                          <span className="text-rose-400 font-semibold">(Reconnecting...)</span>
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Ready Indicator */}
-                  <div>
-                    {player.isHost ? (
-                      <span className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-[#131722] text-[#D4AF37] border border-[#D4AF37]/40 font-bold">
-                        HOST
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${isReady ? 'bg-[#A8C66C]' : 'bg-[#E5A83B]'}`} />
+                      <span className={`text-xs font-mono font-bold ${isReady ? 'text-[#A8C66C]' : 'text-[#E5A83B]'}`}>
+                        {isReady ? 'READY' : 'NOT READY'}
                       </span>
-                    ) : player.isReady ? (
-                      <span className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1 animate-pulse">
-                        <Check className="w-3 h-3" /> READY
-                      </span>
-                    ) : (
-                      <span className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-[#131722] text-[#8F8B83] border border-[#C5A059]/20">
-                        WAITING
-                      </span>
-                    )}
+                    </div>
                   </div>
+                );
+              })}
+
+              {/* Empty Slots */}
+              {emptySlots.map((_, idx) => (
+                <div
+                  key={`empty-${idx}`}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-[#293130]/50 text-[#A8ADA7]/60"
+                >
+                  <div className="w-9 h-9 rounded-full border border-dashed border-[#293130] flex items-center justify-center text-xs">
+                    •
+                  </div>
+                  <span className="text-xs font-mono">
+                    Waiting for player...
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Room Settings & CTA (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="p-5 rounded-2xl bg-[#101719] border border-[#293130] space-y-3.5">
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#A8ADA7] block pb-2 border-b border-[#293130]/60">
+                ROOM SETTINGS
+              </span>
+
+              <div className="space-y-2 text-xs font-mono">
+                <div className="flex items-center justify-between py-1 border-b border-[#293130]/30">
+                  <span className="text-[#A8ADA7]">Number Range</span>
+                  <span className="font-bold text-[#F1EBDD]">1 - 100</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-[#293130]/30">
+                  <span className="text-[#A8ADA7]">Round Time</span>
+                  <span className="font-bold text-[#F1EBDD]">{gameState.settings.roundTime || 60} sec</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-[#293130]/30">
+                  <span className="text-[#A8ADA7]">Question Time</span>
+                  <span className="font-bold text-[#F1EBDD]">{gameState.settings.questionTime || 15} sec</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-[#293130]/30">
+                  <span className="text-[#A8ADA7]">Guess Time</span>
+                  <span className="font-bold text-[#F1EBDD]">{gameState.settings.guessTime || 30} sec</span>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-[#A8ADA7]">Max Players</span>
+                  <span className="font-bold text-[#F1EBDD]">{maxPlayers}</span>
                 </div>
               </div>
-            );
-          })}
+
+              {/* Actions Area */}
+              <div className="pt-3 space-y-2.5">
+                {isHost ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        playStart();
+                        onStartGame();
+                      }}
+                      disabled={!canStart}
+                      className="w-full py-3.5 rounded-xl bg-[#A8C66C] hover:bg-[#B8D47C] disabled:bg-[#1E2728] disabled:text-[#A8ADA7] text-[#070B0D] font-display font-bold text-sm tracking-wide transition-all shadow-md active:scale-98"
+                    >
+                      START GAME
+                    </button>
+                    {!allReady && (
+                      <p className="text-[11px] font-mono text-center text-[#A8ADA7]">
+                        All players must be ready
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <button
+                    onClick={handleReadyClick}
+                    className={`w-full py-3.5 rounded-xl font-display font-bold text-sm tracking-wide transition-all shadow-md active:scale-98 ${
+                      me?.isReady
+                        ? 'bg-[#151D1D] border border-[#A8C66C] text-[#A8C66C]'
+                        : 'bg-[#A8C66C] text-[#070B0D] hover:bg-[#B8D47C]'
+                    }`}
+                  >
+                    {me?.isReady ? '✓ I AM READY (WAITING FOR HOST)' : 'READY UP'}
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    playClick();
+                    onLeaveRoom();
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-transparent hover:bg-rose-950/20 border border-[#E05D52]/40 text-[#E05D52] font-mono text-xs font-semibold transition-all"
+                >
+                  LEAVE ROOM
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Error alert if any */}
-      {error && (
-        <div className="mb-4 p-3.5 rounded-2xl bg-rose-950/60 border border-rose-500/50 text-rose-300 text-xs font-mono flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
+      {/* Bottom Navigation Bar */}
+      <div className="pt-6 border-t border-[#293130] flex items-center justify-around text-xs font-mono text-[#A8ADA7]">
+        <div className="flex flex-col items-center gap-1 text-[#A8C66C] cursor-pointer">
+          <Home className="w-4 h-4" />
+          <span className="text-[10px] uppercase font-bold tracking-wider">Lobby</span>
         </div>
-      )}
-
-      {/* Action Controls Bar (Mobile Sticky) */}
-      <div className="sticky bottom-2 z-20 bg-[#0D1017]/95 border border-[#C5A059]/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xl">
-        <div className="w-full sm:w-auto text-center sm:text-left">
-          <span className="text-[11px] sm:text-xs font-mono text-[#A7A29A] block">
-            {isHost
-              ? canStart
-                ? 'All players ready! Click Start Arena Game below.'
-                : `Waiting for all players to ready up (Min ${minPlayers} players).`
-              : me?.isReady
-              ? 'You are READY! Waiting for host to launch.'
-              : 'Click "I AM READY" to confirm preparedness.'}
-          </span>
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <BookOpen className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Rules</span>
         </div>
-
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          {!isHost && (
-            <button
-              onClick={handleReadyClick}
-              className={`w-full sm:w-auto flex-1 sm:flex-initial py-3.5 px-6 rounded-xl sm:rounded-2xl font-display font-bold text-sm transition-all active:scale-95 shadow-lg ${
-                me?.isReady
-                  ? 'bg-rose-950/40 text-rose-200 border border-rose-500/50 hover:bg-rose-900/50'
-                  : 'bg-emerald-950/40 text-emerald-200 border border-emerald-500/50 hover:bg-emerald-900/50 shadow-emerald-500/10'
-              }`}
-            >
-              {me?.isReady ? 'CANCEL READY' : 'I AM READY'}
-            </button>
-          )}
-
-          {isHost && (
-            <button
-              onClick={() => {
-                playStart();
-                onStartGame();
-              }}
-              disabled={!canStart}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 py-3.5 px-7 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-display font-extrabold text-sm sm:text-base shadow-xl shadow-[#D4AF37]/25 border border-[#F3E5AB]/40 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black shrink-0" />
-              <span>START ARENA GAME</span>
-            </button>
-          )}
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <Settings className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Settings</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 hover:text-[#F1EBDD] cursor-pointer transition-colors">
+          <User className="w-4 h-4" />
+          <span className="text-[10px] uppercase tracking-wider">Profile</span>
         </div>
       </div>
     </div>

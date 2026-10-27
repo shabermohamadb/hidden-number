@@ -81,8 +81,8 @@ export const GameArenaView: React.FC<Props> = ({
           remainingSeconds={remainingSeconds}
           onSubmitGuess={onSubmitGuess}
           isSubmitting={isSubmittingGuess}
-          hasSubmitted={Boolean(me?.hasSubmittedGuess)}
-          submittedGuess={me?.guess ?? null}
+          hasSubmitted={Boolean(me?.hasGuessed || gameState.mySubmittedGuess !== null)}
+          submittedGuess={gameState.mySubmittedGuess ?? null}
         />
       ) : (
         /* SCREEN 3: QUESTION PHASE */

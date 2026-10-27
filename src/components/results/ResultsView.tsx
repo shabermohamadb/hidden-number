@@ -90,7 +90,7 @@ export const ResultsView: React.FC<Props> = ({
                 {winner.nickname}
               </span>
               <div className="font-mono font-bold text-2xl text-[#C6A45A]">
-                {winner.roundScore} <span className="text-sm uppercase font-normal text-[#A8ADA7]">POINTS</span>
+                {winner.roundPoints} <span className="text-sm uppercase font-normal text-[#A8ADA7]">POINTS</span>
               </div>
             </div>
 
@@ -141,12 +141,12 @@ export const ResultsView: React.FC<Props> = ({
 
                       {/* Actual Number */}
                       <td className="py-3.5 text-center text-[#F1EBDD] font-bold">
-                        {score.actualNumber}
+                        {score.secretNumber}
                       </td>
 
                       {/* Your Guess */}
                       <td className="py-3.5 text-center text-[#A8ADA7]">
-                        {score.guess !== null ? score.guess : '—'}
+                        {score.submittedGuess !== null ? score.submittedGuess : '—'}
                       </td>
 
                       {/* Difference */}
@@ -156,7 +156,7 @@ export const ResultsView: React.FC<Props> = ({
 
                       {/* Points */}
                       <td className="py-3.5 text-right font-bold text-[#F1EBDD]">
-                        {score.roundScore}
+                        {score.roundPoints}
                       </td>
                     </tr>
                   );

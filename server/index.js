@@ -821,7 +821,7 @@ if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html')))
 }
 
 // Start persistent server
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`[HIDDEN NUMBER] Server running on port ${PORT}`);
   console.log(`[HIDDEN NUMBER] Health check available at http://localhost:${PORT}/api/health`);
 });

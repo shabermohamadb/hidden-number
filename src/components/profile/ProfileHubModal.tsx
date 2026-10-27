@@ -132,14 +132,14 @@ export const ProfileHubModal: React.FC<Props> = ({
   };
 
   // Real Stats from profile
-  const matches = profile?.stats?.matchesPlayed || 0;
+  const matches = profile?.stats?.gamesPlayed || 0;
   const wins = profile?.stats?.wins || 0;
   const winRate = profile?.stats?.winRate ? Math.round(profile.stats.winRate * 100) : 0;
-  const bestStreak = profile?.stats?.bestWinningStreak || 0;
-  const currentLevel = profile?.progression?.level || 1;
-  const currentXp = profile?.progression?.currentXp || 0;
-  const requiredXp = profile?.progression?.xpRequiredForNextLevel || 1000;
-  const xpPercent = Math.min(100, Math.round((currentXp / requiredXp) * 100));
+  const bestStreak = profile?.stats?.bestStreak || 0;
+  const currentLevel = profile?.level || 1;
+  const currentXp = profile?.currentLevelXp || profile?.xp || 0;
+  const requiredXp = profile?.nextLevelXp || 1000;
+  const xpPercent = profile?.levelProgressPercent || Math.min(100, Math.round((currentXp / requiredXp) * 100));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
@@ -368,11 +368,11 @@ export const ProfileHubModal: React.FC<Props> = ({
 
                         <div className="flex items-center gap-3">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            match.won ? 'bg-[#A8C66C]/15 text-[#A8C66C]' : 'bg-[#101719] text-[#A8ADA7]'
+                            match.isWin ? 'bg-[#A8C66C]/15 text-[#A8C66C]' : 'bg-[#101719] text-[#A8ADA7]'
                           }`}>
-                            {match.won ? 'Won' : 'Completed'}
+                            {match.isWin ? 'Won' : 'Completed'}
                           </span>
-                          <span className="font-bold text-[#F1EBDD]">+{match.pointsAwarded || 50} PTS</span>
+                          <span className="font-bold text-[#F1EBDD]">+{match.finalScore || 50} PTS</span>
                         </div>
                       </div>
                     ))}
@@ -398,11 +398,11 @@ export const ProfileHubModal: React.FC<Props> = ({
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#151D1D] border border-[#293130]">
                   <span className="text-[#A8ADA7] block text-[10px] uppercase">Current Streak</span>
-                  <span className="font-bold text-lg text-[#F1EBDD]">{profile?.stats?.currentWinningStreak || 0}</span>
+                  <span className="font-bold text-lg text-[#F1EBDD]">{profile?.stats?.currentStreak || 0}</span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#151D1D] border border-[#293130]">
                   <span className="text-[#A8ADA7] block text-[10px] uppercase">Total Career Score</span>
-                  <span className="font-bold text-lg text-[#F1EBDD]">{profile?.stats?.totalScore || 0}</span>
+                  <span className="font-bold text-lg text-[#F1EBDD]">{profile?.stats?.totalPoints || 0}</span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#151D1D] border border-[#293130]">
                   <span className="text-[#A8ADA7] block text-[10px] uppercase">Best Single Match</span>
@@ -430,7 +430,7 @@ export const ProfileHubModal: React.FC<Props> = ({
                     <div>
                       <div className="flex items-center gap-2">
                         <Award className={`w-4 h-4 ${ach.unlocked ? 'text-[#C6A45A]' : 'text-[#A8ADA7]'}`} />
-                        <span className="font-bold">{ach.title}</span>
+                        <span className="font-bold">{ach.name}</span>
                       </div>
                       <p className="text-[11px] text-[#A8ADA7] mt-0.5">{ach.description}</p>
                     </div>
@@ -461,8 +461,8 @@ export const ProfileHubModal: React.FC<Props> = ({
                         <div className="text-[10px] text-[#A8ADA7]">{new Date(m.playedAt).toLocaleDateString()}</div>
                       </div>
                       <div className="text-right">
-                        <span className="font-bold text-[#A8C66C]">+{m.pointsAwarded} PTS</span>
-                        <div className="text-[10px] text-[#A8ADA7]">{m.won ? 'Won' : 'Completed'}</div>
+                        <span className="font-bold text-[#A8C66C]">+{m.finalScore} PTS</span>
+                        <div className="text-[10px] text-[#A8ADA7]">{m.isWin ? 'Won' : 'Completed'}</div>
                       </div>
                     </div>
                   ))}

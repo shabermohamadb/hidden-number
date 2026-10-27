@@ -225,7 +225,7 @@ export const LobbyView: React.FC<Props> = ({
                 </div>
                 <div className="flex items-center justify-between py-1 border-b border-[#293130]/30">
                   <span className="text-[#A8ADA7]">Round Time</span>
-                  <span className="font-bold text-[#F1EBDD]">{gameState.settings.roundTime || 60} sec</span>
+                  <span className="font-bold text-[#F1EBDD]">{(gameState.settings.questionTime || 60) + (gameState.settings.guessTime || 15)} sec</span>
                 </div>
                 <div className="flex items-center justify-between py-1 border-b border-[#293130]/30">
                   <span className="text-[#A8ADA7]">Question Time</span>

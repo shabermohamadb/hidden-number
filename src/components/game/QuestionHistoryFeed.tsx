@@ -33,7 +33,7 @@ export const QuestionHistoryFeed: React.FC<Props> = ({ questionHistory, myPlayer
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                   {q.answers.map((ans) => (
                     <span
-                      key={ans.id}
+                      key={ans.playerId}
                       className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                         ans.answer === 'YES'
                           ? 'text-[#A8C66C] bg-[#A8C66C]/10'

@@ -43,6 +43,7 @@ export interface GameMessage {
   senderId?: string;
   senderName?: string;
   senderAvatar?: string;
+  targetPlayerId?: string;
   content: string;
   timestamp: number;
   answers?: Answer[];

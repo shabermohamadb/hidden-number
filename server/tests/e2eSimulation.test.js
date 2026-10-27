@@ -53,13 +53,13 @@ describe('Multiplayer E2E Socket.IO Simulation (3 Concurrent Clients)', () => {
         if (cb) cb({ success: true });
       });
 
-      socket.on('game:ask-question', ({ content }, cb) => {
-        const res = activeGame.askQuestion(currentPlayerId, content);
+      socket.on('game:ask-question', ({ content, targetPlayerId }, cb) => {
+        const res = activeGame.askQuestion(currentPlayerId, content, targetPlayerId);
         if (cb) cb(res);
       });
 
-      socket.on('game:submit-answer', ({ questionId, answer }, cb) => {
-        const res = activeGame.submitAnswer(currentPlayerId, questionId, answer);
+      socket.on('game:submit-answer', ({ questionId, answer, targetPlayerId }, cb) => {
+        const res = activeGame.submitAnswer(currentPlayerId, questionId, answer, targetPlayerId);
         if (cb) cb(res);
       });
 
@@ -160,24 +160,26 @@ describe('Multiplayer E2E Socket.IO Simulation (3 Concurrent Clients)', () => {
     socketBob.on('game:question', (q) => { receivedQuestion = q; });
 
     await new Promise((resolve) => {
-      socketAlice.emit('game:ask-question', { content: 'Is my number even?' }, resolve);
+      socketAlice.emit('game:ask-question', { content: 'Is my number even?', targetPlayerId: 'client-bob' }, resolve);
     });
 
     await new Promise(r => setTimeout(r, 100));
     assert.ok(receivedQuestion);
     assert.strictEqual(receivedQuestion.content, 'Is my number even?');
+    assert.strictEqual(receivedQuestion.targetPlayerId, 'client-bob');
 
     // Bob answers
     let receivedAnswer = null;
     socketAlice.on('game:answer', (a) => { receivedAnswer = a; });
 
     await new Promise((resolve) => {
-      socketBob.emit('game:submit-answer', { questionId: receivedQuestion.id, answer: 'YES' }, resolve);
+      socketBob.emit('game:submit-answer', { questionId: receivedQuestion.id, answer: 'YES', targetPlayerId: 'client-alice' }, resolve);
     });
 
     await new Promise(r => setTimeout(r, 100));
     assert.ok(receivedAnswer);
     assert.strictEqual(receivedAnswer.answer, 'YES');
+    assert.strictEqual(receivedAnswer.targetPlayerId, 'client-alice');
 
     // 7. Transition to Guessing Phase
     activeGame.transitionToGuessingPhase();

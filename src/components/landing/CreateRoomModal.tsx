@@ -44,20 +44,20 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#0B0F19] border border-cyan-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-cyan-500/10">
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-[#0D1017] border border-[#C5A059]/35 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80">
+        <div className="flex items-center justify-between pb-4 border-b border-[#C5A059]/20">
           <div>
-            <h2 className="font-display font-black text-xl text-white tracking-wide">
+            <h2 className="font-display font-black text-xl text-[#FAF8F5] tracking-wide">
               CREATE ROOM
             </h2>
-            <p className="text-xs text-slate-400 font-sans mt-0.5">
+            <p className="text-xs text-[#8F8B83] font-sans mt-0.5">
               Customize game rules and arena parameters
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
+            className="p-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] text-[#A7A29A] hover:text-[#FAF8F5] transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -66,8 +66,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {/* Room Visibility */}
           <div>
-            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-cyan-400" />
+            <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Room Visibility</span>
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -79,8 +79,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                 }}
                 className={`py-2.5 px-4 rounded-xl border text-xs font-mono font-semibold transition-all ${
                   visibility === 'public'
-                    ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-lg shadow-cyan-500/10'
-                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                    ? 'bg-[#181E2C] border-[#D4AF37] text-[#D4AF37] shadow-md shadow-[#D4AF37]/10'
+                    : 'bg-[#131722] border-[#C5A059]/20 text-[#8F8B83] hover:bg-[#1B2130]'
                 }`}
               >
                 Public Room
@@ -93,8 +93,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                 }}
                 className={`py-2.5 px-4 rounded-xl border text-xs font-mono font-semibold transition-all ${
                   visibility === 'private'
-                    ? 'bg-violet-500/20 border-violet-400 text-violet-200 shadow-lg shadow-violet-500/10'
-                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                    ? 'bg-[#181E2C] border-[#D4AF37] text-[#D4AF37] shadow-md shadow-[#D4AF37]/10'
+                    : 'bg-[#131722] border-[#C5A059]/20 text-[#8F8B83] hover:bg-[#1B2130]'
                 }`}
               >
                 Private Room
@@ -105,8 +105,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
           {/* Password (if private) */}
           {visibility === 'private' && (
             <div>
-              <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#E5A83B]" />
                 <span>Optional Password</span>
               </label>
               <input
@@ -114,15 +114,15 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                 placeholder="Leave blank for open invite link"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-cyan-400"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#131722] border border-[#C5A059]/30 text-[#F5F2EB] placeholder-[#5A564F] text-sm font-mono focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
           )}
 
           {/* Question Phase Duration */}
           <div>
-            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+            <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Question Phase Timer</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -136,8 +136,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                   }}
                   className={`py-2 rounded-xl border text-xs font-mono font-semibold transition-all ${
                     questionTime === seconds
-                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200'
-                      : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                      ? 'bg-[#181E2C] border-[#D4AF37] text-[#D4AF37]'
+                      : 'bg-[#131722] border-[#C5A059]/20 text-[#8F8B83] hover:bg-[#1B2130]'
                   }`}
                 >
                   {seconds}s
@@ -148,8 +148,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
 
           {/* Total Rounds */}
           <div>
-            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
-              <Hash className="w-3.5 h-3.5 text-cyan-400" />
+            <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2 flex items-center gap-1.5">
+              <Hash className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Match Length</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -163,8 +163,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                   }}
                   className={`py-2 rounded-xl border text-xs font-mono font-semibold transition-all ${
                     totalRounds === rounds
-                      ? 'bg-indigo-500/20 border-indigo-400 text-indigo-200'
-                      : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                      ? 'bg-[#181E2C] border-[#D4AF37] text-[#D4AF37]'
+                      : 'bg-[#131722] border-[#C5A059]/20 text-[#8F8B83] hover:bg-[#1B2130]'
                   }`}
                 >
                   {rounds} {rounds === 1 ? 'Round' : 'Rounds'}
@@ -175,8 +175,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
 
           {/* Minimum Players to Start */}
           <div>
-            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-cyan-400" />
+            <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Minimum Players to Start Game</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -190,8 +190,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
                   }}
                   className={`py-2 rounded-xl border text-xs font-mono font-semibold transition-all ${
                     minPlayers === count
-                      ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200'
-                      : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
+                      ? 'bg-[#181E2C] border-[#D4AF37] text-[#D4AF37]'
+                      : 'bg-[#131722] border-[#C5A059]/20 text-[#8F8B83] hover:bg-[#1B2130]'
                   }`}
                 >
                   {count} Players {count === 2 ? '(1v1)' : ''}
@@ -202,8 +202,8 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
 
           {/* Max Players */}
           <div>
-            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-cyan-400" />
+            <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Player Limit: {maxPlayers} Players</span>
             </label>
             <input
@@ -212,26 +212,26 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
               max="10"
               value={maxPlayers}
               onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
-              className="w-full accent-cyan-400 h-2 bg-slate-800 rounded-lg cursor-pointer"
+              className="w-full accent-[#D4AF37] h-2 bg-[#131722] rounded-lg cursor-pointer"
             />
-            <div className="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
+            <div className="flex justify-between text-[11px] font-mono text-[#8F8B83] mt-1">
               <span>3 Min</span>
               <span>10 Max</span>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+          <div className="pt-4 border-t border-[#C5A059]/20 flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-semibold text-sm transition-all"
+              className="px-5 py-2.5 rounded-xl bg-[#131722] hover:bg-[#1B2130] text-[#A7A29A] font-semibold text-sm transition-all border border-[#C5A059]/20"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 transition-all disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-bold text-sm shadow-lg shadow-[#D4AF37]/20 border border-[#F3E5AB]/30 transition-all disabled:opacity-50"
             >
               {isLoading ? 'Creating Room...' : 'Create & Enter Lobby'}
             </button>
@@ -241,4 +241,3 @@ export const CreateRoomModal: React.FC<Props> = ({ isOpen, onClose, onCreate, is
     </div>
   );
 };
-

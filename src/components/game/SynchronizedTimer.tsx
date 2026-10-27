@@ -5,7 +5,7 @@ import { useSoundFX } from '../../hooks/useSoundFX';
 
 interface Props {
   deadline: number | null;
-  totalDuration: number; // e.g. 60 or 15
+  totalDuration: number;
   phaseName: string;
 }
 
@@ -43,7 +43,7 @@ export const SynchronizedTimer: React.FC<Props> = ({ deadline, totalDuration, ph
   const progressPercent = Math.max(0, Math.min(100, (remaining / totalDuration) * 100));
 
   return (
-    <div className="flex items-center gap-3 bg-slate-900/90 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md shadow-xl">
+    <div className="flex items-center gap-3 bg-[#0D1017] border border-[#C5A059]/30 px-4 py-2 rounded-2xl backdrop-blur-md shadow-xl">
       <div className="relative w-8 h-8 flex items-center justify-center">
         {/* SVG Circular Progress Bar */}
         <svg className="w-8 h-8 transform -rotate-90">
@@ -53,7 +53,7 @@ export const SynchronizedTimer: React.FC<Props> = ({ deadline, totalDuration, ph
             r="13"
             stroke="currentColor"
             strokeWidth="2.5"
-            className="text-white/10"
+            className="text-[#C5A059]/20"
             fill="transparent"
           />
           <circle
@@ -65,23 +65,22 @@ export const SynchronizedTimer: React.FC<Props> = ({ deadline, totalDuration, ph
             strokeDasharray={81.68}
             strokeDashoffset={81.68 - (81.68 * progressPercent) / 100}
             strokeLinecap="round"
-            className={`transition-all duration-300 ${isUrgent ? 'text-amber-400' : 'text-cyan-400'}`}
+            className={`transition-all duration-300 ${isUrgent ? 'text-[#E5A83B]' : 'text-[#D4AF37]'}`}
             fill="transparent"
           />
         </svg>
 
-        <Clock className={`w-3.5 h-3.5 absolute ${isUrgent ? 'text-amber-400 animate-pulse' : 'text-cyan-400'}`} />
+        <Clock className={`w-3.5 h-3.5 absolute ${isUrgent ? 'text-[#E5A83B] animate-pulse' : 'text-[#D4AF37]'}`} />
       </div>
 
       <div>
-        <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8B83]">
           {phaseName}
         </div>
-        <div className={`font-mono font-black text-lg leading-tight ${isUrgent ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
+        <div className={`font-mono font-black text-lg leading-tight ${isUrgent ? 'text-[#E5A83B] animate-pulse' : 'text-[#FAF8F5]'}`}>
           0:{remaining.toString().padStart(2, '0')}
         </div>
       </div>
     </div>
   );
 };
-

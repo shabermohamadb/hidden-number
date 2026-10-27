@@ -1,6 +1,6 @@
 // src/components/common/ServerConfigModal.tsx
 import React, { useState } from 'react';
-import { X, Server, Check, AlertCircle, RefreshCw, ExternalLink, Globe } from 'lucide-react';
+import { X, Server, Check, AlertCircle, RefreshCw, Globe } from 'lucide-react';
 import { getServerUrl, setServerUrl } from '../../config/serverUrl';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
@@ -63,39 +63,39 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#0B0F19] border border-cyan-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-cyan-500/10 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="relative w-full max-w-lg bg-[#0D1017] border border-[#C5A059]/35 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between pb-4 border-b border-[#C5A059]/20">
           <div className="flex items-center gap-2">
-            <Server className="w-5 h-5 text-cyan-400" />
-            <h2 className="font-display font-black text-xl text-white tracking-wide">
+            <Server className="w-5 h-5 text-[#D4AF37]" />
+            <h2 className="font-display font-black text-xl text-[#F5F2EB] tracking-wide">
               BACKEND SERVER CONNECTION
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
+            className="p-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] text-[#A7A29A] hover:text-[#F5F2EB] transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Why is it offline? Explanation */}
-        <div className="mt-4 p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-slate-300 space-y-2">
-          <div className="font-bold text-cyan-300 flex items-center gap-1.5">
-            <Globe className="w-4 h-4 text-cyan-400" />
+        <div className="mt-4 p-4 rounded-2xl bg-[#131722] border border-[#C5A059]/25 text-xs text-[#A7A29A] space-y-2">
+          <div className="font-bold text-[#D4AF37] flex items-center gap-1.5">
+            <Globe className="w-4 h-4 text-[#D4AF37]" />
             <span>Why does it show OFFLINE on Vercel?</span>
           </div>
           <p className="leading-relaxed">
-            Vercel is a static web host and cannot maintain the long-lived, continuous WebSockets required for multiplayer party games.
+            Vercel is a static web host and cannot maintain the persistent WebSockets required for real-time multiplayer deduction.
           </p>
           <p className="leading-relaxed">
-            Your Node.js backend (<code className="text-cyan-200">server/index.js</code>) needs to run on a persistent server host such as <strong>Render</strong>, <strong>Railway</strong>, or <strong>Fly.io</strong>.
+            Your Node.js backend (<code className="text-[#F3E5AB]">server/index.js</code>) runs on persistent cloud server hosts such as <strong>Render</strong>, <strong>Railway</strong>, or <strong>Fly.io</strong>.
           </p>
         </div>
 
         <form onSubmit={handleSave} className="mt-6 space-y-4">
           <div>
-            <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2">
+            <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2">
               WebSocket Server URL
             </label>
             <div className="flex gap-2">
@@ -108,13 +108,13 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
                   setUrl(e.target.value);
                   setTestResult(null);
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-cyan-400"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-[#131722] border border-[#C5A059]/30 text-[#F5F2EB] placeholder-[#5A564F] text-sm font-mono focus:outline-none focus:border-[#D4AF37]"
               />
               <button
                 type="button"
                 onClick={() => handleTestConnection(url)}
                 disabled={testing || !url.trim()}
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-mono font-bold text-cyan-300 transition-all disabled:opacity-40"
+                className="px-4 py-2.5 rounded-xl bg-[#181E2C] hover:bg-[#222A3E] border border-[#C5A059]/30 text-xs font-mono font-bold text-[#D4AF37] transition-all disabled:opacity-40"
               >
                 {testing ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Test'}
               </button>
@@ -135,26 +135,26 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
           )}
 
           {/* Quick Deploy Guide */}
-          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 text-xs text-slate-400 space-y-2">
-            <div className="font-semibold text-slate-200 uppercase font-mono tracking-wider">
+          <div className="p-4 rounded-2xl bg-[#131722]/80 border border-[#C5A059]/20 text-xs text-[#8F8B83] space-y-2">
+            <div className="font-semibold text-[#F5F2EB] uppercase font-mono tracking-wider">
               How to deploy backend in 2 minutes (Free):
             </div>
-            <ol className="list-decimal pl-4 space-y-1 font-mono text-[11px] text-slate-300">
+            <ol className="list-decimal pl-4 space-y-1 font-mono text-[11px] text-[#A7A29A]">
               <li>Deploy repo to <strong>Render.com</strong> as a <em>Web Service</em></li>
-              <li>Build command: <code className="text-cyan-300">npm install</code></li>
-              <li>Start command: <code className="text-cyan-300">npm run server</code></li>
-              <li>Copy your Render URL (e.g. <code className="text-cyan-300">https://xyz.onrender.com</code>) and paste it here!</li>
+              <li>Build command: <code className="text-[#D4AF37]">npm install</code></li>
+              <li>Start command: <code className="text-[#D4AF37]">npm run server</code></li>
+              <li>Copy your Render URL (e.g. <code className="text-[#D4AF37]">https://xyz.onrender.com</code>) and paste it here!</li>
             </ol>
-            <div className="pt-1 text-[11px] text-slate-400">
-              Tip: In Vercel Project Settings, you can also add <code className="text-cyan-300">VITE_SERVER_URL</code> to automatically configure it for all players!
+            <div className="pt-1 text-[11px] text-[#8F8B83]">
+              Tip: In Vercel Project Settings, you can also add <code className="text-[#D4AF37]">VITE_SERVER_URL</code> to automatically configure it for all players!
             </div>
           </div>
 
-          <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+          <div className="pt-4 border-t border-[#C5A059]/20 flex items-center justify-between">
             <button
               type="button"
               onClick={handleResetToDefault}
-              className="text-xs font-mono text-slate-400 hover:text-white underline"
+              className="text-xs font-mono text-[#8F8B83] hover:text-[#FAF8F5] underline"
             >
               Reset to Current Host
             </button>
@@ -163,13 +163,13 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-semibold text-xs"
+                className="px-4 py-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] text-[#A7A29A] font-semibold text-xs border border-[#C5A059]/20"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-cyan-500/20"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-bold text-xs shadow-md shadow-[#D4AF37]/20 border border-[#F3E5AB]/30 transition-all"
               >
                 Save & Connect
               </button>
@@ -180,4 +180,3 @@ export const ServerConfigModal: React.FC<Props> = ({ isOpen, onClose, onReconnec
     </div>
   );
 };
-

@@ -29,9 +29,9 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
     const container = mountRef.current;
     if (!container) return;
 
-    // 2. Three.js Scene Setup
+    // 2. Three.js Scene Setup (Dark Obsidian Arena)
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x06080F, 0.04);
+    scene.fog = new THREE.FogExp2(0x07080B, 0.045);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0, 14);
@@ -40,84 +40,93 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.15;
     container.appendChild(renderer.domElement);
 
-    // 3. Dynamic Lighting
-    const ambientLight = new THREE.AmbientLight(0x0B0F19, 2.5);
+    // 3. Dynamic Antique Gold & Obsidian Lighting
+    const ambientLight = new THREE.AmbientLight(0x0D1017, 2.2);
     scene.add(ambientLight);
 
-    const coreLight = new THREE.PointLight(0x38BDF8, 3, 25);
+    const coreLight = new THREE.PointLight(0xD4AF37, 3.2, 28);
     coreLight.position.set(0, 0, 0);
     scene.add(coreLight);
 
-    const rimLight = new THREE.DirectionalLight(0x818CF8, 1.8);
+    const rimLight = new THREE.DirectionalLight(0xC5A059, 1.6);
     rimLight.position.set(10, 15, 10);
     scene.add(rimLight);
 
-    const amberLight = new THREE.PointLight(0xF59E0B, 0, 20);
+    const amberLight = new THREE.PointLight(0xE5A83B, 0, 22);
     amberLight.position.set(0, -5, 5);
     scene.add(amberLight);
 
-    // 4. Central Mind Core
+    // 4. Central Mind Core (Obsidian Polyhedron with Engraved Gold Armature)
     const coreGroup = new THREE.Group();
     scene.add(coreGroup);
 
     // Inner Icosahedron
     const icoGeo = new THREE.IcosahedronGeometry(2.2, 0);
     const icoMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0B1224,
-      emissive: 0x06B6D4,
+      color: 0x0D1017,
+      emissive: 0x8C6D34,
       emissiveIntensity: 0.35,
-      roughness: 0.2,
-      metalness: 0.8,
+      roughness: 0.25,
+      metalness: 0.85,
       wireframe: true
     });
     const innerCore = new THREE.Mesh(icoGeo, icoMat);
     coreGroup.add(innerCore);
 
-    // Rotating Concentric Rings
+    // Rotating Concentric Antique Gold Rings
     const ringMat1 = new THREE.MeshStandardMaterial({
-      color: 0x38BDF8,
-      roughness: 0.3,
-      metalness: 0.7,
+      color: 0xD4AF37,
+      roughness: 0.25,
+      metalness: 0.85,
       wireframe: true
     });
     const ringMat2 = new THREE.MeshStandardMaterial({
-      color: 0x818CF8,
+      color: 0xC5A059,
       roughness: 0.3,
-      metalness: 0.7,
+      metalness: 0.8,
+      wireframe: true
+    });
+    const ringMat3 = new THREE.MeshStandardMaterial({
+      color: 0x8C6D34,
+      roughness: 0.3,
+      metalness: 0.8,
       wireframe: true
     });
 
     const ring1 = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.04, 16, 64), ringMat1);
     const ring2 = new THREE.Mesh(new THREE.TorusGeometry(4.8, 0.04, 16, 64), ringMat2);
     ring2.rotation.x = Math.PI / 3;
-    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(5.8, 0.04, 16, 64), ringMat1);
+    const ring3 = new THREE.Mesh(new THREE.TorusGeometry(5.8, 0.04, 16, 64), ringMat3);
     ring3.rotation.y = Math.PI / 4;
 
     coreGroup.add(ring1);
     coreGroup.add(ring2);
     coreGroup.add(ring3);
 
-    // 5. Floating Number Cubes
-    // Generate canvas texture with numbers for the cube faces
+    // 5. Floating Number Cubes (Obsidian Stone with Inscribed Antique Gold Numerals)
     const createNumberTexture = (numStr: string) => {
       const c = document.createElement('canvas');
       c.width = 256;
       c.height = 256;
       const ctx = c.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = '#0B0F19';
+        ctx.fillStyle = '#0D1017';
         ctx.fillRect(0, 0, 256, 256);
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-        ctx.lineWidth = 8;
-        ctx.strokeRect(4, 4, 248, 248);
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(6, 6, 244, 244);
 
-        ctx.font = 'bold 110px "Space Grotesk", sans-serif';
+        ctx.strokeStyle = 'rgba(197, 160, 89, 0.25)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(14, 14, 228, 228);
+
+        ctx.font = 'bold 112px "Space Grotesk", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#38BDF8';
+        ctx.fillStyle = '#D4AF37';
         ctx.fillText(numStr, 128, 128);
       }
       return new THREE.CanvasTexture(c);
@@ -134,18 +143,18 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
       const cubeMat = new THREE.MeshStandardMaterial({
         map: texture,
         roughness: 0.25,
-        metalness: 0.75,
-        emissive: 0x06B6D4,
-        emissiveIntensity: 0.15
+        metalness: 0.8,
+        emissive: 0x8C6D34,
+        emissiveIntensity: 0.18
       });
       const cubeGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
       const mesh = new THREE.Mesh(cubeGeo, cubeMat);
 
-      // Distribute in a spherical orbit
+      // Distribute in a balanced spherical orbit
       const angle = (index / decorativeNumbers.length) * Math.PI * 2;
       const radius = 7 + (index % 3) * 2;
       const x = Math.cos(angle) * radius;
-      const y = (Math.sin(angle * 2) * 2.5) + (index % 2 === 0 ? 1 : -1);
+      const y = (Math.sin(angle * 2) * 2.2) + (index % 2 === 0 ? 1 : -1);
       const z = Math.sin(angle) * (radius * 0.7) - 2;
 
       mesh.position.set(x, y, z);
@@ -153,14 +162,14 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
 
       cubes.push({
         mesh,
-        rotSpeed: { x: (Math.random() - 0.5) * 0.015, y: (Math.random() - 0.5) * 0.02 },
-        floatSpeed: 0.8 + Math.random() * 0.8,
+        rotSpeed: { x: (Math.random() - 0.5) * 0.012, y: (Math.random() - 0.5) * 0.016 },
+        floatSpeed: 0.8 + Math.random() * 0.6,
         baseY: y
       });
     });
 
-    // 6. Particle Field (Neural Dust)
-    const particleCount = 700;
+    // 6. Particle Field (Subtle Warm Antique Gold Starlight & Arena Dust)
+    const particleCount = 550;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -170,20 +179,21 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
       positions[i + 1] = (Math.random() - 0.5) * 25;
       positions[i + 2] = (Math.random() - 0.5) * 25;
 
-      const isCyan = Math.random() > 0.4;
-      colors[i] = isCyan ? 0.22 : 0.5;
-      colors[i + 1] = isCyan ? 0.74 : 0.55;
-      colors[i + 2] = 0.97;
+      // Antique Gold (0.83, 0.69, 0.22) & Bronze/Amber (0.90, 0.66, 0.23)
+      const isGold = Math.random() > 0.35;
+      colors[i] = isGold ? 0.83 : 0.90;
+      colors[i + 1] = isGold ? 0.69 : 0.66;
+      colors[i + 2] = isGold ? 0.22 : 0.23;
     }
 
     particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const particleMat = new THREE.PointsMaterial({
-      size: 0.08,
+      size: 0.075,
       vertexColors: true,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending
     });
 
@@ -199,8 +209,8 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-      targetCameraX = mouseX * 1.5;
-      targetCameraY = mouseY * 1.0;
+      targetCameraX = mouseX * 1.2;
+      targetCameraY = mouseY * 0.8;
     };
     window.addEventListener('mousemove', handleMouseMove);
 
@@ -212,7 +222,7 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
     };
     window.addEventListener('resize', handleResize);
 
-    // 9. Animation Loop
+    // 9. Coordinated Animation Loop
     let clock = new THREE.Clock();
     let animId: number;
 
@@ -226,40 +236,40 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
       camera.lookAt(0, 0, 0);
 
       // Core rotation
-      const speedMultiplier = phase === 'RESULTS' ? 1.8 : isUrgent ? 1.4 : 1.0;
-      coreGroup.rotation.y += 0.005 * speedMultiplier;
-      innerCore.rotation.x += 0.01 * speedMultiplier;
-      innerCore.rotation.y += 0.012 * speedMultiplier;
+      const speedMultiplier = phase === 'RESULTS' ? 1.6 : isUrgent ? 1.4 : 1.0;
+      coreGroup.rotation.y += 0.004 * speedMultiplier;
+      innerCore.rotation.x += 0.008 * speedMultiplier;
+      innerCore.rotation.y += 0.01 * speedMultiplier;
 
-      ring1.rotation.z += 0.008 * speedMultiplier;
-      ring2.rotation.x += 0.006 * speedMultiplier;
-      ring3.rotation.y -= 0.007 * speedMultiplier;
+      ring1.rotation.z += 0.007 * speedMultiplier;
+      ring2.rotation.x += 0.005 * speedMultiplier;
+      ring3.rotation.y -= 0.006 * speedMultiplier;
 
-      // Pulse inner core scale slightly
-      const pulse = 1 + Math.sin(elapsed * 2.5) * 0.05;
+      // Pulse inner core scale subtly
+      const pulse = 1 + Math.sin(elapsed * 2) * 0.04;
       innerCore.scale.set(pulse, pulse, pulse);
 
       // Urgency / State light transition
       if (isUrgent) {
         amberLight.intensity = Math.abs(Math.sin(elapsed * 6)) * 4;
-        coreLight.color.setHex(0xF59E0B);
+        coreLight.color.setHex(0xE5A83B);
       } else if (phase === 'RESULTS') {
-        coreLight.color.setHex(0x10B981);
-        amberLight.intensity = 1.5;
+        coreLight.color.setHex(0xD4AF37);
+        amberLight.intensity = 1.8;
       } else {
-        coreLight.color.setHex(0x38BDF8);
-        amberLight.intensity = 0;
+        coreLight.color.setHex(0xD4AF37);
+        amberLight.intensity = 0.4;
       }
 
       // Animate floating cubes
       cubes.forEach((cube, i) => {
         cube.mesh.rotation.x += cube.rotSpeed.x;
         cube.mesh.rotation.y += cube.rotSpeed.y;
-        cube.mesh.position.y = cube.baseY + Math.sin(elapsed * cube.floatSpeed + i) * 0.4;
+        cube.mesh.position.y = cube.baseY + Math.sin(elapsed * cube.floatSpeed + i) * 0.35;
       });
 
-      // Ambient particle slow drift
-      particles.rotation.y = elapsed * 0.02;
+      // Ambient particle drift
+      particles.rotation.y = elapsed * 0.015;
 
       renderer.render(scene, camera);
       animId = requestAnimationFrame(animate);
@@ -280,6 +290,7 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
       ring3.geometry.dispose();
       ringMat1.dispose();
       ringMat2.dispose();
+      ringMat3.dispose();
       particleGeo.dispose();
       particleMat.dispose();
 
@@ -311,4 +322,3 @@ export const CinematicBackground: React.FC<Props> = ({ phase = 'LOBBY', isUrgent
     />
   );
 };
-

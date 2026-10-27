@@ -307,10 +307,10 @@ export function useSocket() {
     });
   }, []);
 
-  const askQuestion = useCallback((content: string) => {
+  const askQuestion = useCallback((content: string, targetPlayerId?: string) => {
     return new Promise<{ success: boolean; error?: string }>((resolve) => {
       if (!socketRef.current) return resolve({ success: false, error: 'Socket disconnected' });
-      socketRef.current.emit('game:ask-question', { content }, (res: { success: boolean; error?: string }) => {
+      socketRef.current.emit('game:ask-question', { content, targetPlayerId }, (res: { success: boolean; error?: string }) => {
         if (!res.success) setError(res.error || 'Failed to ask question');
         resolve(res);
       });

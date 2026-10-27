@@ -1,6 +1,6 @@
 // src/components/profile/ProfileDrawer.tsx
 import React, { useState } from 'react';
-import { X, User, Trophy, Award, Target, Check } from 'lucide-react';
+import { X, User, Trophy, Check } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 interface Props {
@@ -33,7 +33,6 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
   const wins = parseInt(localStorage.getItem('hn_stat_wins') || '0', 10);
   const totalPoints = parseInt(localStorage.getItem('hn_stat_points') || '0', 10);
   const exactGuesses = parseInt(localStorage.getItem('hn_stat_exact') || '0', 10);
-  const accuracy = gamesPlayed > 0 ? Math.round(totalPoints / (gamesPlayed * 100) * 100) : 0;
 
   if (!isOpen) return null;
 
@@ -50,17 +49,17 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-md h-full bg-[#0B0F19] border-l border-white/10 p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-md h-full bg-[#0D1017] border-l border-[#C5A059]/30 p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300">
         <div>
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-4 border-b border-[#C5A059]/20">
             <div className="flex items-center gap-2">
-              <User className="w-5 h-5 text-cyan-400" />
-              <h2 className="font-display font-black text-xl text-white">PLAYER PROFILE</h2>
+              <User className="w-5 h-5 text-[#D4AF37]" />
+              <h2 className="font-display font-black text-xl text-[#FAF8F5]">PLAYER PROFILE</h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
+              className="p-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] text-[#A7A29A] hover:text-[#FAF8F5] transition-all"
             >
               <X className="w-5 h-5" />
             </button>
@@ -69,7 +68,7 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
           <form onSubmit={handleSave} className="mt-6 space-y-6">
             {/* Nickname */}
             <div>
-              <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2">
+              <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2">
                 Display Nickname
               </label>
               <input
@@ -78,13 +77,13 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
                 maxLength={20}
                 value={currentNickname}
                 onChange={(e) => setCurrentNickname(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white text-sm font-mono focus:outline-none focus:border-cyan-400"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#131722] border border-[#C5A059]/30 text-[#F5F2EB] text-sm font-mono focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
 
             {/* Avatar Selection */}
             <div>
-              <label className="block text-xs font-mono font-semibold uppercase text-slate-300 mb-2">
+              <label className="block text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-2">
                 Select Mind Core Avatar
               </label>
               <div className="grid grid-cols-4 gap-3">
@@ -100,15 +99,15 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
                       }}
                       className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center border transition-all ${
                         isSelected
-                          ? 'bg-cyan-500/20 border-cyan-400 shadow-lg shadow-cyan-500/25 scale-105'
-                          : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-400'
+                          ? 'bg-[#181E2C] border-[#D4AF37] shadow-md shadow-[#D4AF37]/20 scale-105'
+                          : 'bg-[#131722] border-[#C5A059]/20 hover:bg-[#1B2130] text-[#A7A29A]'
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 via-indigo-600 to-violet-600 flex items-center justify-center font-bold text-white text-xs">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center font-bold text-black text-xs">
                         #{index + 1}
                       </div>
                       {isSelected && (
-                        <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-cyan-400 flex items-center justify-center">
+                        <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#D4AF37] flex items-center justify-center">
                           <Check className="w-2.5 h-2.5 text-black font-bold" />
                         </div>
                       )}
@@ -119,42 +118,42 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
             </div>
 
             {/* Career Stats */}
-            <div className="pt-4 border-t border-white/10">
-              <h3 className="text-xs font-mono font-semibold uppercase text-slate-300 mb-3 flex items-center gap-1.5">
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <div className="pt-4 border-t border-[#C5A059]/20">
+              <h3 className="text-xs font-mono font-semibold uppercase text-[#A7A29A] mb-3 flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>Arena Record</span>
               </h3>
 
               <div className="grid grid-cols-2 gap-3 font-mono">
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
-                  <div className="text-[10px] text-slate-400 uppercase">Matches Played</div>
-                  <div className="text-xl font-bold text-white mt-0.5">{gamesPlayed}</div>
+                <div className="p-3 rounded-xl bg-[#131722] border border-[#C5A059]/20">
+                  <div className="text-[10px] text-[#8F8B83] uppercase">Matches Played</div>
+                  <div className="text-xl font-bold text-[#FAF8F5] mt-0.5">{gamesPlayed}</div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
-                  <div className="text-[10px] text-slate-400 uppercase">Victories</div>
+                <div className="p-3 rounded-xl bg-[#131722] border border-[#C5A059]/20">
+                  <div className="text-[10px] text-[#8F8B83] uppercase">Victories</div>
                   <div className="text-xl font-bold text-emerald-400 mt-0.5">{wins}</div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
-                  <div className="text-[10px] text-slate-400 uppercase">Total Points</div>
-                  <div className="text-xl font-bold text-cyan-400 mt-0.5">{totalPoints}</div>
+                <div className="p-3 rounded-xl bg-[#131722] border border-[#C5A059]/20">
+                  <div className="text-[10px] text-[#8F8B83] uppercase">Total Points</div>
+                  <div className="text-xl font-bold text-[#D4AF37] mt-0.5">{totalPoints}</div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10">
-                  <div className="text-[10px] text-slate-400 uppercase">Exact Guesses</div>
-                  <div className="text-xl font-bold text-amber-400 mt-0.5">{exactGuesses}</div>
+                <div className="p-3 rounded-xl bg-[#131722] border border-[#C5A059]/20">
+                  <div className="text-[10px] text-[#8F8B83] uppercase">Exact Guesses</div>
+                  <div className="text-xl font-bold text-[#F3E5AB] mt-0.5">{exactGuesses}</div>
                 </div>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#9A7B38] via-[#D4AF37] to-[#8C6D34] hover:from-[#B89243] hover:via-[#E5C158] hover:to-[#A7833D] text-black font-bold text-sm shadow-lg shadow-[#D4AF37]/20 border border-[#F3E5AB]/30 transition-all"
             >
               {saved ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-300" />
+                  <Check className="w-4 h-4 text-black" />
                   <span>Profile Saved!</span>
                 </>
               ) : (
@@ -164,11 +163,10 @@ export const ProfileDrawer: React.FC<Props> = ({ isOpen, onClose, nickname, avat
           </form>
         </div>
 
-        <div className="text-center text-[11px] font-mono text-slate-500">
+        <div className="text-center text-[11px] font-mono text-[#5A564F]">
           Player ID: {localStorage.getItem('hn_player_id')?.slice(0, 8)}...
         </div>
       </div>
     </div>
   );
 };
-

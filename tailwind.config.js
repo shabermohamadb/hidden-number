@@ -8,19 +8,24 @@ export default {
     extend: {
       colors: {
         arena: {
-          bg: '#06080F',
-          dark: '#0B0F19',
-          surface: '#111726',
-          surfaceLight: '#182138',
-          border: 'rgba(255, 255, 255, 0.08)',
-          borderHover: 'rgba(56, 189, 248, 0.3)',
-          cyan: '#38BDF8',
-          violet: '#818CF8',
-          neon: '#06B6D4',
-          accent: '#6366F1',
-          amber: '#F59E0B',
+          bg: '#07080B',
+          dark: '#0D1017',
+          stone: '#131722',
+          surface: '#181E2C',
+          surfaceLight: '#21293C',
+          border: 'rgba(197, 160, 89, 0.2)',
+          borderGold: 'rgba(212, 175, 55, 0.35)',
+          borderHover: 'rgba(212, 175, 55, 0.6)',
+          gold: '#D4AF37',
+          goldGleam: '#F3E5AB',
+          goldDeep: '#9A7B38',
+          bronze: '#C5A059',
+          bronzeDeep: '#8C6D34',
+          ivory: '#F5F2EB',
+          stoneMuted: '#8F8B83',
+          amber: '#E5A83B',
           emerald: '#10B981',
-          rose: '#F43F5E'
+          rose: '#E11D48'
         }
       },
       fontFamily: {
@@ -31,7 +36,7 @@ export default {
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float-slow': 'float 6s ease-in-out infinite',
-        'glow-pulse': 'glow 2s ease-in-out infinite alternate',
+        'glow-pulse': 'glow 2.5s ease-in-out infinite alternate',
         'spin-slow': 'spin 20s linear infinite',
       },
       keyframes: {
@@ -40,8 +45,8 @@ export default {
           '50%': { transform: 'translateY(-10px)' },
         },
         glow: {
-          '0%': { boxShadow: '0 0 15px rgba(56, 189, 248, 0.2)' },
-          '100%': { boxShadow: '0 0 35px rgba(129, 140, 248, 0.4)' },
+          '0%': { boxShadow: '0 0 15px rgba(212, 175, 55, 0.15)' },
+          '100%': { boxShadow: '0 0 35px rgba(212, 175, 55, 0.4)' },
         }
       }
     },

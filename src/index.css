@@ -4,8 +4,8 @@
 
 @layer base {
   body {
-    background-color: #06080F;
-    color: #F8FAFC;
+    background-color: #07080B;
+    color: #F5F2EB;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
@@ -17,15 +17,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(11, 15, 25, 0.5);
+  background: rgba(13, 16, 23, 0.6);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(197, 160, 89, 0.25);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.4);
+  background: rgba(212, 175, 55, 0.5);
 }
-

@@ -1,6 +1,6 @@
 // src/components/common/NavigationHeader.tsx
 import React, { useState } from 'react';
-import { Volume2, VolumeX, HelpCircle, BookOpen, User, Wifi, WifiOff, Copy, Check } from 'lucide-react';
+import { Volume2, VolumeX, HelpCircle, BookOpen, Copy, Check } from 'lucide-react';
 import { useSoundFX } from '../../hooks/useSoundFX';
 
 interface Props {
@@ -22,7 +22,6 @@ export const NavigationHeader: React.FC<Props> = ({
   currentRound,
   totalRounds,
   nickname,
-  avatar,
   onOpenHowToPlay,
   onOpenRules,
   onOpenProfile,
@@ -41,22 +40,22 @@ export const NavigationHeader: React.FC<Props> = ({
   };
 
   return (
-    <header className="relative z-30 w-full px-3 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between border-b border-white/5 bg-[#06080F]/90 backdrop-blur-md">
+    <header className="relative z-30 w-full px-3 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between border-b border-[#C5A059]/15 bg-[#07080B]/90 backdrop-blur-md">
       {/* Brand Logo & Tagline */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/40 shrink-0">
-          <span className="font-display font-black text-lg sm:text-xl text-white">?</span>
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#0D1017] border border-[#D4AF37]/50 flex items-center justify-center shadow-md shadow-[#D4AF37]/10 shrink-0">
+          <span className="font-display font-black text-lg sm:text-xl text-[#D4AF37]">?</span>
         </div>
         <div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="font-display font-black tracking-wider text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-200">
+            <span className="font-display font-black tracking-wider text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#FAF8F5] via-[#F5F2EB] to-[#D4AF37]">
               HIDDEN NUMBER
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
+            <span className="hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#131722] text-[#D4AF37] border border-[#C5A059]/30">
               Arena v1.0
             </span>
           </div>
-          <p className="hidden md:block text-[11px] text-slate-400 font-sans">
+          <p className="hidden md:block text-[11px] text-[#8F8B83] font-sans">
             Everyone knows your number. Except you.
           </p>
         </div>
@@ -64,13 +63,13 @@ export const NavigationHeader: React.FC<Props> = ({
 
       {/* Center Room / Round Status if active (desktop) */}
       {roomCode && (
-        <div className="hidden md:flex items-center gap-2 sm:gap-4 bg-slate-900/80 border border-white/10 px-3 py-1.5 rounded-xl shadow-inner">
+        <div className="hidden md:flex items-center gap-2 sm:gap-4 bg-[#0D1017] border border-[#C5A059]/25 px-3.5 py-1.5 rounded-xl shadow-inner">
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-slate-400 uppercase font-mono">Room:</span>
+            <span className="text-[11px] text-[#8F8B83] uppercase font-mono">Room:</span>
             <button
               onClick={handleCopyCode}
               title="Click to copy room code"
-              className="group flex items-center gap-1 font-mono font-bold text-xs sm:text-sm text-cyan-300 hover:text-cyan-200 transition-colors"
+              className="group flex items-center gap-1.5 font-mono font-bold text-xs sm:text-sm text-[#D4AF37] hover:text-[#F3E5AB] transition-colors"
             >
               <span>{roomCode}</span>
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />}
@@ -79,9 +78,9 @@ export const NavigationHeader: React.FC<Props> = ({
 
           {currentRound && totalRounds && (
             <>
-              <div className="w-px h-3.5 bg-white/15" />
-              <div className="text-xs font-mono font-semibold text-slate-300">
-                Round <span className="text-cyan-400">{currentRound}</span>/{totalRounds}
+              <div className="w-px h-3.5 bg-[#C5A059]/20" />
+              <div className="text-xs font-mono font-semibold text-[#F5F2EB]">
+                Round <span className="text-[#D4AF37] font-bold">{currentRound}</span>/{totalRounds}
               </div>
             </>
           )}
@@ -124,21 +123,21 @@ export const NavigationHeader: React.FC<Props> = ({
               setShowAudioPopover(!showAudioPopover);
             }}
             title="Audio settings"
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all"
+            className="p-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/25 text-[#A7A29A] hover:text-[#F5F2EB] transition-all"
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-cyan-400" />}
+            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-[#D4AF37]" />}
           </button>
 
           {showAudioPopover && (
-            <div className="absolute right-0 mt-2 w-64 p-4 rounded-2xl bg-slate-900/95 border border-white/15 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
-                <span className="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono">Sound Settings</span>
+            <div className="absolute right-0 mt-2 w-64 p-4 rounded-2xl bg-[#0D1017]/95 border border-[#C5A059]/30 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between pb-2 mb-3 border-b border-[#C5A059]/20">
+                <span className="text-xs font-bold text-[#F5F2EB] uppercase tracking-wider font-mono">Sound Settings</span>
                 <button
                   onClick={() => {
                     playClick();
                     toggleMute();
                   }}
-                  className="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-white/10 hover:bg-white/15 text-slate-200"
+                  className="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-[#181E2C] hover:bg-[#222A3E] text-[#D4AF37] border border-[#C5A059]/30"
                 >
                   {isMuted ? 'UNMUTE' : 'MUTE'}
                 </button>
@@ -146,7 +145,7 @@ export const NavigationHeader: React.FC<Props> = ({
 
               <div className="space-y-3">
                 <div>
-                  <div className="flex justify-between text-xs text-slate-300 mb-1 font-mono">
+                  <div className="flex justify-between text-xs text-[#A7A29A] mb-1 font-mono">
                     <span>SFX</span>
                     <span>{Math.round(sfxVolume * 100)}%</span>
                   </div>
@@ -158,12 +157,12 @@ export const NavigationHeader: React.FC<Props> = ({
                     value={sfxVolume}
                     disabled={isMuted}
                     onChange={(e) => setSfxVolume(parseFloat(e.target.value))}
-                    className="w-full accent-cyan-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                    className="w-full accent-[#D4AF37] h-1.5 bg-[#181E2C] rounded-lg cursor-pointer"
                   />
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs text-slate-300 mb-1 font-mono">
+                  <div className="flex justify-between text-xs text-[#A7A29A] mb-1 font-mono">
                     <span>Music</span>
                     <span>{Math.round(musicVolume * 100)}%</span>
                   </div>
@@ -175,7 +174,7 @@ export const NavigationHeader: React.FC<Props> = ({
                     value={musicVolume}
                     disabled={isMuted}
                     onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
-                    className="w-full accent-violet-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                    className="w-full accent-[#C5A059] h-1.5 bg-[#181E2C] rounded-lg cursor-pointer"
                   />
                 </div>
               </div>
@@ -190,9 +189,9 @@ export const NavigationHeader: React.FC<Props> = ({
             onOpenHowToPlay();
           }}
           title="How to Play"
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all"
+          className="p-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/25 text-[#A7A29A] hover:text-[#F5F2EB] transition-all"
         >
-          <HelpCircle className="w-4 h-4" />
+          <HelpCircle className="w-4 h-4 text-[#D4AF37]" />
         </button>
 
         {/* Rules & Scoring */}
@@ -202,9 +201,9 @@ export const NavigationHeader: React.FC<Props> = ({
             onOpenRules();
           }}
           title="Rules & Scoring System"
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all"
+          className="p-2 rounded-xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/25 text-[#A7A29A] hover:text-[#F5F2EB] transition-all"
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-4 h-4 text-[#D4AF37]" />
         </button>
 
         {/* Profile */}
@@ -213,12 +212,12 @@ export const NavigationHeader: React.FC<Props> = ({
             playClick();
             onOpenProfile();
           }}
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/40 text-cyan-200 transition-all"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#131722] hover:bg-[#1B2130] border border-[#C5A059]/30 text-[#F5F2EB] transition-all"
         >
-          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-white">
+          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center text-[10px] font-bold text-black">
             {nickname.charAt(0).toUpperCase()}
           </div>
-          <span className="hidden sm:inline font-mono text-xs font-semibold max-w-[90px] truncate">
+          <span className="hidden sm:inline font-mono text-xs font-semibold max-w-[90px] truncate text-[#FAF8F5]">
             {nickname}
           </span>
         </button>
@@ -226,4 +225,3 @@ export const NavigationHeader: React.FC<Props> = ({
     </header>
   );
 };
-

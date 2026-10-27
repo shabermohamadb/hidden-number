@@ -1,7 +1,7 @@
 // src/components/game/PlayerCircleCard.tsx
 import React from 'react';
 import { Player } from '../../types/game';
-import { Shield, Eye, HelpCircle, Check, Crown } from 'lucide-react';
+import { Check, Crown, ArrowRight, Crosshair } from 'lucide-react';
 
 interface Props {
   player: Player;
@@ -14,29 +14,29 @@ export const PlayerCircleCard: React.FC<Props> = ({ player, isMe, onTarget, isTa
   return (
     <div
       onClick={!isMe ? onTarget : undefined}
-      className={`relative p-4 sm:p-5 rounded-3xl border transition-all ${
+      className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all ${
         isMe
-          ? 'bg-gradient-to-b from-cyan-950/40 via-slate-900/80 to-[#0B0F19] border-cyan-400/60 shadow-2xl shadow-cyan-500/20 ring-1 ring-cyan-400/40'
+          ? 'bg-[#181E2C] border-[#D4AF37] shadow-xl shadow-[#D4AF37]/10 ring-1 ring-[#D4AF37]/40'
           : isTargeted
-          ? 'bg-indigo-950/40 border-indigo-400 shadow-xl shadow-indigo-500/20 scale-105 cursor-pointer'
-          : 'bg-slate-900/70 border-white/10 hover:border-white/20 hover:scale-[1.02] cursor-pointer'
+          ? 'bg-[#181E2C] border-[#D4AF37] shadow-xl shadow-[#D4AF37]/20 scale-[1.02] cursor-pointer'
+          : 'bg-[#0D1017] border-[#C5A059]/25 hover:border-[#D4AF37]/60 hover:scale-[1.01] cursor-pointer'
       }`}
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-md">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8C6D34] to-[#D4AF37] flex items-center justify-center text-xs font-bold text-black shadow-md shrink-0">
             {player.nickname.charAt(0).toUpperCase()}
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-display font-bold text-xs sm:text-sm text-white max-w-[100px] truncate">
+              <span className="font-display font-bold text-xs sm:text-sm text-[#FAF8F5] max-w-[110px] truncate">
                 {player.nickname}
               </span>
-              {player.isHost && <Crown className="w-3 h-3 text-amber-400" />}
+              {player.isHost && <Crown className="w-3 h-3 text-[#D4AF37]" />}
             </div>
             {isMe && (
-              <span className="text-[10px] font-mono text-cyan-400 font-bold tracking-wider">
+              <span className="text-[10px] font-mono text-[#D4AF37] font-bold tracking-wider">
                 (YOU)
               </span>
             )}
@@ -45,52 +45,59 @@ export const PlayerCircleCard: React.FC<Props> = ({ player, isMe, onTarget, isTa
 
         {/* Guess Status Badge */}
         {player.hasGuessed ? (
-          <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
+          <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/40">
             <Check className="w-3 h-3" />
             <span>GUESSED</span>
           </div>
         ) : (
-          <div className="text-[10px] font-mono text-slate-500 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
+          <div className="text-[10px] font-mono text-[#8F8B83] bg-[#131722] px-2 py-0.5 rounded-full border border-[#C5A059]/20">
             THINKING
           </div>
         )}
       </div>
 
       {/* Central Number Display Box */}
-      <div className="relative py-4 flex flex-col items-center justify-center">
+      <div className="relative py-3 flex flex-col items-center justify-center">
         {isMe ? (
           /* THE CONCEALED MYSTERY CARD (NEVER REVEALED TO ITS OWNER!) */
-          <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl bg-[#070A12] border-2 border-dashed border-cyan-500/50 flex flex-col items-center justify-center overflow-hidden shadow-inner group">
-            {/* Shimmer sweep */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-cyan-400/10 to-transparent animate-pulse" />
+          <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl bg-[#07080B] border-2 border-dashed border-[#D4AF37]/50 flex flex-col items-center justify-center overflow-hidden shadow-inner group">
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#D4AF37]/10 to-transparent animate-pulse" />
 
-            <div className="relative text-cyan-400 font-display font-black text-5xl sm:text-6xl animate-bounce">
+            <div className="relative text-[#D4AF37] font-display font-black text-5xl sm:text-6xl animate-bounce">
               ?
             </div>
 
-            <div className="relative mt-1 text-[9px] font-mono text-cyan-300 uppercase tracking-widest px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/40">
+            <div className="relative mt-1 text-[9px] font-mono text-[#F3E5AB] uppercase tracking-widest px-2 py-0.5 rounded bg-[#131722] border border-[#C5A059]/30">
               CONCEALED
             </div>
           </div>
         ) : (
           /* OTHER PLAYERS: CLEARLY VISIBLE NUMBER */
-          <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-white/20 flex flex-col items-center justify-center shadow-xl shadow-cyan-500/5 hover:border-cyan-400/60 transition-all">
-            <div className="text-white font-display font-black text-5xl sm:text-6xl tracking-tight">
+          <div className="relative w-24 h-28 sm:w-28 sm:h-32 rounded-2xl bg-[#131722] border-2 border-[#C5A059]/30 flex flex-col items-center justify-center shadow-lg hover:border-[#D4AF37] transition-all">
+            <div className="text-[#FAF8F5] font-display font-black text-5xl sm:text-6xl tracking-tight">
               {player.secretNumber !== null ? player.secretNumber : '--'}
             </div>
-            <div className="mt-1 text-[9px] font-mono text-slate-400 uppercase tracking-wider">
-              ASSIGNED
+            <div className="mt-1 text-[9px] font-mono text-[#D4AF37] uppercase tracking-wider font-semibold">
+              VISIBLE TO YOU
             </div>
           </div>
         )}
       </div>
 
-      {/* Footer Info */}
-      <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
-        <span>Score:</span>
-        <span className="text-white font-bold">{player.cumulativeScore} pts</span>
+      {/* Footer Info & Target Action */}
+      <div className="pt-2 border-t border-[#C5A059]/15 flex items-center justify-between text-[11px] font-mono">
+        <div className="text-[#8F8B83]">
+          Score: <span className="text-[#FAF8F5] font-bold">{player.cumulativeScore} pts</span>
+        </div>
+
+        {!isMe && (
+          <div className="flex items-center gap-1 text-[11px] text-[#D4AF37] font-semibold group-hover:text-[#F3E5AB]">
+            <Crosshair className="w-3.5 h-3.5" />
+            <span>{isTargeted ? 'Targeted' : 'Interrogate'}</span>
+            <ArrowRight className="w-3 h-3" />
+          </div>
+        )}
       </div>
     </div>
   );
 };
-

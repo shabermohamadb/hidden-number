@@ -503,9 +503,9 @@ export class GameEngine {
   }
 
   /**
-   * Adds a free-form question from a player
+   * Adds a free-form question from a player, optionally directed at a target
    */
-  askQuestion(playerId, rawContent) {
+  askQuestion(playerId, rawContent, targetPlayerId = null) {
     if (this.phase !== GamePhase.QUESTION_PHASE) {
       return { success: false, error: 'Questions can only be asked during the question phase' };
     }
@@ -529,6 +529,7 @@ export class GameEngine {
       senderId: playerId,
       senderName: player.nickname,
       senderAvatar: player.avatar,
+      targetPlayerId: targetPlayerId || null,
       content,
       timestamp: Date.now(),
       answers: []

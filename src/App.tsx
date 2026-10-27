@@ -65,14 +65,28 @@ export function App() {
   const [serverConfigOpen, setServerConfigOpen] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
-  // Check URL parameters for invitation links (?room=XYZ)
+  // 1. Immediately cache invite code from URL parameter (?room=XYZ)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const roomFromUrl = params.get('room');
-    if (roomFromUrl && !gameState) {
-      joinRoom(roomFromUrl.toUpperCase(), nickname, avatar);
+    if (roomFromUrl) {
+      sessionStorage.setItem('hn_pending_invite', roomFromUrl.toUpperCase());
     }
-  }, [joinRoom, nickname, avatar, gameState]);
+  }, []);
+
+  // 2. Automatically process cached invitation once connected and not in a room
+  useEffect(() => {
+    const pendingCode = sessionStorage.getItem('hn_pending_invite');
+    if (pendingCode && connected && !gameState) {
+      sessionStorage.removeItem('hn_pending_invite');
+      // Clean query string from browser bar without triggering page refresh
+      const url = new URL(window.location.href);
+      url.searchParams.delete('room');
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+
+      joinRoom(pendingCode, nickname, avatar);
+    }
+  }, [connected, gameState, joinRoom, nickname, avatar]);
 
   // Record career stats when a match completes
   useEffect(() => {
@@ -133,7 +147,7 @@ export function App() {
   const isUrgentTimer = (gameState?.remainingSeconds ?? 100) <= 10 && (gameState?.phase === 'QUESTION_PHASE' || gameState?.phase === 'GUESSING_PHASE');
 
   return (
-    <div className="relative min-h-screen bg-[#06080F] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="relative min-h-screen bg-[#07080B] text-[#F5F2EB] flex flex-col font-sans selection:bg-[#D4AF37]/30 selection:text-[#F3E5AB]">
       {/* 3D Cinematic Three.js Interactive Background */}
       <CinematicBackground
         phase={gameState?.phase || 'LOBBY'}
@@ -156,15 +170,15 @@ export function App() {
 
       {/* Error alert toast with Connect button */}
       {error && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-rose-950/95 border border-rose-500/50 text-rose-200 text-xs font-mono shadow-2xl backdrop-blur-md flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#0D1017] border border-rose-500/60 text-rose-300 text-xs font-mono shadow-2xl backdrop-blur-md flex items-center gap-3 animate-in slide-in-from-bottom duration-200">
           <span>{error}</span>
           <button
             onClick={() => setServerConfigOpen(true)}
-            className="px-2.5 py-1 rounded-lg bg-rose-500/30 hover:bg-rose-500/50 text-white font-bold transition-all underline"
+            className="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/40 text-[#F5F2EB] font-bold transition-all underline"
           >
             Connect Server
           </button>
-          <button onClick={clearError} className="text-white hover:text-rose-400 font-bold ml-1">✕</button>
+          <button onClick={clearError} className="text-[#A7A29A] hover:text-[#FAF8F5] font-bold ml-1">✕</button>
         </div>
       )}
 
@@ -266,4 +280,3 @@ export function App() {
 }
 
 export default App;
-

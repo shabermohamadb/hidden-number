@@ -376,12 +376,12 @@ io.on('connection', (socket) => {
   });
 
   // 9. Ask Question
-  socket.on('game:ask-question', ({ content }, callback) => {
+  socket.on('game:ask-question', ({ content, targetPlayerId }, callback) => {
     if (!currentRoomCode || !currentPlayerId) return;
     const game = roomManager.getRoom(currentRoomCode);
     if (!game) return;
 
-    const result = game.askQuestion(currentPlayerId, content);
+    const result = game.askQuestion(currentPlayerId, content, targetPlayerId);
     if (callback) callback(result);
   });
 

@@ -25,32 +25,32 @@ export const CanvasFallback: React.FC<Props> = ({ isUrgent = false }) => {
     };
     window.addEventListener('resize', handleResize);
 
-    // Particle nodes
-    const particleCount = 60;
+    // Warm Gold & Bronze Particle Nodes
+    const particleCount = 50;
     const particles = Array.from({ length: particleCount }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
       size: Math.random() * 2 + 1,
-      color: Math.random() > 0.5 ? 'rgba(56, 189, 248, ' : 'rgba(129, 140, 248, '
+      color: Math.random() > 0.4 ? 'rgba(212, 175, 55, ' : 'rgba(197, 160, 89, '
     }));
 
     const render = () => {
-      ctx.fillStyle = '#06080F';
+      ctx.fillStyle = '#07080B';
       ctx.fillRect(0, 0, width, height);
 
-      // Gradient radial glow
+      // Subtle Radial Gold Glow in Arena Center
       const grad = ctx.createRadialGradient(
-        width / 2, height / 2, 50,
-        width / 2, height / 2, Math.max(width, height) / 1.5
+        width / 2, height / 2, 40,
+        width / 2, height / 2, Math.max(width, height) / 1.6
       );
-      grad.addColorStop(0, isUrgent ? 'rgba(245, 158, 11, 0.08)' : 'rgba(56, 189, 248, 0.07)');
-      grad.addColorStop(1, 'rgba(6, 8, 15, 0)');
+      grad.addColorStop(0, isUrgent ? 'rgba(229, 168, 59, 0.12)' : 'rgba(212, 175, 55, 0.08)');
+      grad.addColorStop(1, 'rgba(7, 8, 11, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      // Render connected particles
+      // Render connected antique gold particles
       particles.forEach((p, i) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -65,18 +65,18 @@ export const CanvasFallback: React.FC<Props> = ({ isUrgent = false }) => {
         ctx.fillStyle = p.color + '0.6)';
         ctx.fill();
 
-        // Connect nearby points
+        // Connect nearby points with delicate bronze lines
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 110) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${0.15 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = `rgba(212, 175, 55, ${0.14 * (1 - dist / 110)})`;
+            ctx.lineWidth = 0.75;
             ctx.stroke();
           }
         }
@@ -95,4 +95,3 @@ export const CanvasFallback: React.FC<Props> = ({ isUrgent = false }) => {
 
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none -z-10 w-full h-full" />;
 };
-

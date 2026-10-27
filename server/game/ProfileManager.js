@@ -117,7 +117,8 @@ export const DEFAULT_TITLES = [
 ];
 
 export class ProfileManager {
-  constructor() {
+  constructor(storageFilePath = STORAGE_FILE) {
+    this.storageFile = storageFilePath;
     this.profiles = new Map(); // playerId -> Profile
     this.usernameMap = new Map(); // lowercase username -> playerId
     this.friendships = new Map(); // friendshipId -> Friendship
@@ -125,13 +126,16 @@ export class ProfileManager {
     this.onlineSockets = new Map(); // playerId -> Set<socketId>
     this.activePlayerRooms = new Map(); // playerId -> roomCode
 
-    this.ensureStorageDir();
-    this.loadFromDisk();
+    if (this.storageFile) {
+      this.ensureStorageDir();
+      this.loadFromDisk();
+    }
   }
 
   ensureStorageDir() {
+    if (!this.storageFile) return;
     try {
-      const dir = path.dirname(STORAGE_FILE);
+      const dir = path.dirname(this.storageFile);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
@@ -141,9 +145,10 @@ export class ProfileManager {
   }
 
   loadFromDisk() {
+    if (!this.storageFile) return;
     try {
-      if (fs.existsSync(STORAGE_FILE)) {
-        const raw = fs.readFileSync(STORAGE_FILE, 'utf-8');
+      if (fs.existsSync(this.storageFile)) {
+        const raw = fs.readFileSync(this.storageFile, 'utf-8');
         const data = JSON.parse(raw);
         if (data && Array.isArray(data.profiles)) {
           for (const p of data.profiles) {
@@ -163,13 +168,14 @@ export class ProfileManager {
   }
 
   saveToDisk() {
+    if (!this.storageFile) return;
     try {
       const data = {
         profiles: Array.from(this.profiles.values()),
         friendships: Array.from(this.friendships.values()),
         savedAt: new Date().toISOString()
       };
-      fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      fs.writeFileSync(this.storageFile, JSON.stringify(data, null, 2), 'utf-8');
     } catch {
       // Ephemeral disk writes may fail gracefully
     }

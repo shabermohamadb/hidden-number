@@ -8,7 +8,7 @@ describe('Player Profile, Progression & Social System', () => {
   let pm;
 
   beforeEach(() => {
-    pm = new ProfileManager();
+    pm = new ProfileManager(null);
   });
 
   it('initializes a new profile with level 1, 0 XP, and default cosmetics', () => {
